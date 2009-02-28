@@ -1,0 +1,410 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:WindowedApplication xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" title="CCCatcher" applicationComplete="init();">
+	<mx:Style>
+	    WindowedApplication { 
+	        background-color:"0xFFFFFF";
+	        showFlexChrome:"false";
+	    } 
+	</mx:Style>
+    <mx:Script>
+        <![CDATA[
+        	import mx.rpc.mxml.Concurrency;
+        	import mx.logging.targets.TraceTarget;
+        	import mx.charts.AreaChart;
+            import mx.controls.Alert;
+            import mx.core.DragSource;
+            import mx.events.DragEvent;
+            import flash.events.MouseEvent;
+            import mx.controls.Image;
+            import mx.managers.DragManager
+            import flash.filesystem.File;
+            import flash.events.NativeDragEvent;
+			import flash.desktop.NativeDragManager;
+			import flash.events.NativeDragEvent;
+			import flash.media.Sound;
+			import flash.media.SoundChannel;
+						
+			import flash.events.KeyboardEvent;
+			import flash.ui.Keyboard;
+			
+			import flash.desktop.Clipboard;
+			
+			import model.Config;
+			import view.RandomCover;
+			
+            static private var config:Config = new Config();
+			private var songCurrent:Sound = new Sound();
+			private var channel:SoundChannel = new SoundChannel();
+			
+			private var songPaused:Boolean = true;
+			private var songPosition:Number = 0;
+			
+			private var randomCover:RandomCover = new RandomCover();
+			
+			private var star:ContextMenuItem;
+			private var delTrack:ContextMenuItem;
+			private var pause:ContextMenuItem;
+			private var skip:ContextMenuItem;
+			private var quit:ContextMenuItem;
+			
+			private var shiftKeyDown:Boolean = false;
+			
+			private var holdingSavedSong:Boolean = false;
+
+			//double click emulation
+			private var clickNum:Number = 0
+			private var littleTimer:Timer = new Timer(250,1);
+
+			//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//
+			// SETUP
+			//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//
+            private function init():void {
+                stage.nativeWindow.visible = false;
+                this.setStyle("backgroundAlpha", .0);
+				this.alwaysInFront = true;
+                //registerMovementHandler();
+				stage.nativeWindow.addEventListener(Event.CLOSING, windowClosingHandler); 
+				stage.addEventListener(KeyboardEvent.KEY_DOWN,onKeyDown);
+				stage.addEventListener(KeyboardEvent.KEY_UP,onKeyUp);    
+				
+				//double click emulation
+				littleTimer.addEventListener(TimerEvent.TIMER, doTheClick);
+				
+				randomCover.buttonMode = true;
+				randomCover.addEventListener(NativeDragEvent.NATIVE_DRAG_ENTER,onDragIn);
+				randomCover.addEventListener(NativeDragEvent.NATIVE_DRAG_DROP,onDrop);
+				randomCover.addEventListener(NativeDragEvent.NATIVE_DRAG_EXIT,onDragExit);
+				randomCover.addEventListener(MouseEvent.MOUSE_DOWN, mouseDrag);
+				randomCover.addEventListener(MouseEvent.CLICK, clickFn);
+				randomCover.alpha = .8;
+				stage.addChild(randomCover);
+				//clean dead items out of the TrackList
+				configureContextMenu();
+				loadWindowPosition();
+            }
+            
+            private function configureContextMenu():void{
+				stage.showDefaultContextMenu = true;
+				var cm:ContextMenu = new ContextMenu();
+				cm.hideBuiltInItems();
+				/*
+				skip = new ContextMenuItem("Skip");
+				skip.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, onSkipSelect);
+				cm.customItems.push(skip);
+				*/
+				star = new ContextMenuItem("Star");
+				star.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, onStarSelect);
+				cm.customItems.push(star);
+				
+				delTrack = new ContextMenuItem("Delete");
+				delTrack.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, onDeleteSelect);
+				cm.customItems.push(delTrack);
+
+				pause = new ContextMenuItem("Pause");
+				pause.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, onPauseSelect);
+				cm.customItems.push(pause);
+				
+				quit = new ContextMenuItem("Quit");
+				quit.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, onQuitSelect);
+				cm.customItems.push(quit);
+				
+				randomCover.contextMenu = cm;
+            }
+                        
+            private function loadWindowPosition():void{
+				stage.nativeWindow.x = config.windowX;
+				stage.nativeWindow.y = config.windowY;
+				//stage.nativeWindow.width = prefsXML.windowState.@width;
+				//stage.nativeWindow.height = prefsXML.windowState.@height;
+            	stage.nativeWindow.visible = true;
+            	erectPlayer();
+            }
+            private function saveWindowPosition():void{
+				//TODO: check to make sure the window is at least partially on the user's screen
+            }
+
+            private function removeDuplicates(tl:Array):Array{
+			    var z:Array = tl.filter(function (a:*,b:int,c:Array):Boolean { return ((z ? z : z = new Array()).indexOf(a) >= 0 ? false : (z.push(a) >= 0)); }, this);
+				return z;             		
+            }
+            
+			//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//
+			// UTIL
+			//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//
+			
+			/**
+			 * This function takes an array of files and folders and retuns an array of just files
+			 * This function also removes hidden files
+			 * @param files
+			 * 
+			*/		
+			private function cleanFileArray(files:Array):Array{
+				var arrayToReturn:Array = new Array();
+				
+				for each (var fileOrDir:File in files){
+					if( fileOrDir.isDirectory ){
+						// If we find a directory, call this method again to extract the files
+						// This will recurse until there are only files in the returning array
+						var subArray:Array = this.cleanFileArray( fileOrDir.getDirectoryListing() );
+						arrayToReturn = arrayToReturn.concat( subArray ); // Combin the files with the arrayToReturn
+					}else if( fileOrDir.isHidden ){
+						// Skip hidden files
+					}else{
+						// If we have a file add it to the array of files to return
+						arrayToReturn.push( fileOrDir );
+					}
+				}
+				return arrayToReturn;
+			}
+
+			//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//
+			// HANDLERS
+			//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//
+			
+			private function togglePlay():void{
+				//modify sound?
+				if(songPaused == true){ //is paused, must play
+					channel = songCurrent.play(songPosition);
+					channel.addEventListener(Event.SOUND_COMPLETE, randomPlay);
+				}
+				else{ //is play, must pause
+					songPosition = channel.position;
+					channel.stop();
+				}
+				songPaused = !songPaused;
+			}
+			
+			private function windowClosingHandler(event:Event=null):void {
+				config.saveWindowState(stage.nativeWindow.x, stage.nativeWindow.y);
+				config.saveChannelState(channel.position);
+				config.writeXMLData();
+			}
+			
+			
+			
+
+			//kb handlers			
+			private function onKeyDown(e:KeyboardEvent):void{
+				if(e.keyCode == Keyboard.SHIFT){
+					shiftKeyDown = true;					
+				}
+			}
+			private function onKeyUp(e:KeyboardEvent):void{
+				if(e.keyCode == Keyboard.SHIFT){
+					shiftKeyDown = false;
+				}
+			}
+			
+			
+			
+						
+			//drag & drop handlers
+			public function onDragIn(event:NativeDragEvent):void{
+			    NativeDragManager.dropAction = NativeDragActions.MOVE;
+			    if(event.clipboard.hasFormat(ClipboardFormats.FILE_LIST_FORMAT)){
+			    	NativeDragManager.acceptDragDrop(randomCover);
+			        //NativeDragManager.acceptDragDrop(this); //'this' is the receiving component
+			    }
+			}
+			public function onDrop(event:NativeDragEvent):void{
+				var dropFiles:Array = event.clipboard.getData(ClipboardFormats.FILE_LIST_FORMAT) as Array;
+				dropFiles = cleanFileArray(dropFiles);
+				for each (var file:File in dropFiles){
+					switch (file.extension){
+						case "mp3":
+							trace('adding: '+file.nativePath);
+							config.addTrack(file.nativePath);
+							break;
+						default:
+							//trace(file.name+" not a recognised file format"); 
+					}
+				}
+			}
+			public function onDragExit(event:NativeDragEvent):void{
+			    //trace("Drag exit event.");
+			}
+			
+			
+			
+			//for being able to grab the app and drag it around
+			public function registerMovementHandler():void {
+				randomCover.addEventListener( MouseEvent.MOUSE_DOWN, mouseDrag );
+			}
+			public function mouseDrag(event:MouseEvent):void {
+				stage.nativeWindow.startMove();
+			}
+			
+			
+			
+			//double click emulation
+			private function clickFn(event:MouseEvent):void{
+				clickNum++
+				littleTimer.start()	
+			}
+			private function doTheClick(event:TimerEvent):void{
+				if(clickNum == 1){
+					singleClickAction();
+					littleTimer.stop();
+					clickNum=0;
+				}else{
+					doubleClickAction();
+					littleTimer.stop();
+					clickNum=0;
+				}
+			}
+			private function singleClickAction():void{
+				if(shiftKeyDown == true){
+					songPosition = channel.position + 20000; //move ahead a magic number of milliseconds
+					channel.stop();
+					if(songCurrent.length > songPosition){
+						channel = songCurrent.play(songPosition);
+						channel.addEventListener(Event.SOUND_COMPLETE, randomPlay);
+						//todo: display currentSeconds/totalSeconds
+						//todo: if currentSeconds > totalSeconds randomPlay()
+						trace('songPosition: '+(int(songPosition/1000))+'/'+(int(songCurrent.length/1000)));
+					}else{
+						randomPlay();
+					}
+				}
+			}
+			private function doubleClickAction():void{
+				if(shiftKeyDown == true){
+					randomCover.refreshWith(config.currentRandomSong);
+				}
+				else{
+					randomPlay();
+				}
+			}
+			
+			private function tagCurrentTrack():void{
+				var currentRandomSong:String = config.currentRandomSong;
+				//todo: rename file w/ -gorehole-
+				var renameName:String = currentRandomSong.replace('.mp3', '-dinoaids-.mp3');
+				trace(renameName);
+				
+			    var origFileLoc:File = File.desktopDirectory.resolvePath(currentRandomSong);
+			    origFileLoc.addEventListener(Event.COMPLETE,moveFileListener);
+			    var newFileLoc:File = File.desktopDirectory.resolvePath(renameName);
+			    origFileLoc.moveToAsync(newFileLoc);
+			    config.renameTrack(currentRandomSong, renameName);
+			}
+			private function moveFileListener(event:Event):void{
+			    trace("file moved");
+			}
+			
+			
+			/**
+			* randomPlay() the next track, delete the file from the filesystem.
+			*/
+			private function deleteCurrentTrack():void{
+				var currentRandomSong:String = config.currentRandomSong;
+				randomPlay();
+			    //todo: remove from XML structure? or should this be handled in the config
+
+				//remove from file system
+			    var temp:File = File.desktopDirectory.resolvePath(currentRandomSong)
+			    if(temp.exists == true){
+					temp.addEventListener(Event.COMPLETE, deleteFileListener);
+					temp.deleteFileAsync();
+					//config.removeTrack(currentRandomSong);
+					trace('filesystem no longer contains '+currentRandomSong);
+				}
+			}
+			private function deleteFileListener(event:Event):void{
+			}
+			
+			
+			
+			/**
+			 * if we had saved a song and position
+			 * get it on
+			 * otherwise shuffle up
+			 */
+            private function erectPlayer():void{
+				var currentRandomSong:String = config.currentRandomSong;
+				
+				//special case: first time app is run there's no song to play =(
+				if(currentRandomSong == ''){return;}
+				
+            	if(config.nativePathDontExist(currentRandomSong) == true){
+            		randomPlay();
+            	}else{//start playback with the saved settings
+            		holdingSavedSong = true;
+            		randomPlay();
+            	}
+            }
+			//check the distribution of this thing to ensure that every item has an equal chance
+			//also add an option so that a track doesn't get played twice until all tracks have been heard once
+			private function randomPlay(e:Event=null):void{
+				var currentRandomSong:String;
+				//chose a random song. if there are no songs, return
+				if(holdingSavedSong == false){
+					currentRandomSong = config.getRandomSong(); //Math.floor(Math.random() * trackList.length);
+				}else{
+					currentRandomSong = config.currentRandomSong;
+					holdingSavedSong = false;
+				}
+				
+
+				//special case: first time application is run, lets not freak out
+				if(currentRandomSong == ''){
+					return void;
+				}
+				
+				//stop currentRandomSong
+				if(channel){
+					channel.stop();
+					channel = null;
+				}
+				//do a newie
+				channel = new SoundChannel();
+				loadSound(currentRandomSong);
+			}
+			private function loadSound(currentRandomSong:String):void{
+				trace('shuffle: '+currentRandomSong);
+				var req:URLRequest = new URLRequest(currentRandomSong);
+				songCurrent = new Sound(req);
+				songCurrent.addEventListener(Event.COMPLETE, onSoundLoaded);
+			}
+			private function onSoundLoaded(event:Event):void{
+				channel.stop();
+				channel = songCurrent.play(config.savedPosition);
+				channel.addEventListener(Event.SOUND_COMPLETE, randomPlay);
+				songPaused = false;
+				config.savedPosition = 0;
+				randomCover.refreshWith(config.currentRandomSong);
+			}
+						
+			
+			//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//
+			// MENU ITEM HANDLERS
+			//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//
+			private function onStarSelect(e:ContextMenuEvent=null):void{
+				tagCurrentTrack();
+			}
+			private function onDeleteSelect(e:ContextMenuEvent=null):void{
+				deleteCurrentTrack();
+			}
+			private function onPauseSelect(e:ContextMenuEvent=null):void{
+				togglePlay();
+			}
+			private function onSkipSelect(e:ContextMenuEvent=null):void{
+				randomPlay();
+			}
+			private function onDoubleClick(e:Event=null):void{
+				
+			}
+			private function onQuitSelect(e:ContextMenuEvent=null):void{
+				windowClosingHandler();
+				//NativeApplication.nativeApplication.exit();
+				nativeApplication.exit();
+			}
+			private function onConfigSelect(e:ContextMenuEvent=null):void{
+				//todo =(
+			}
+
+
+        ]]>
+    </mx:Script>
+</mx:WindowedApplication>
+
