@@ -211,8 +211,8 @@
 				for each (var file:File in dropFiles){
 					switch (file.extension){
 						case "mp3":
-							trace('onDrop() add file.nativePath: '+file.nativePath);
-							config.addTrack(file.nativePath);
+							trace('onDrop() add file.url: '+file.url);
+							config.addTrack(file.url);
 							break;
 						default:
 							//trace(file.name+" not a recognised file format"); 
