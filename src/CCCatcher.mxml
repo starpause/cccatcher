@@ -10,7 +10,6 @@
         <![CDATA[
         	import mx.rpc.mxml.Concurrency;
         	import mx.logging.targets.TraceTarget;
-        	import mx.charts.AreaChart;
             import mx.controls.Alert;
             import mx.core.DragSource;
             import mx.events.DragEvent;
@@ -212,7 +211,7 @@
 				for each (var file:File in dropFiles){
 					switch (file.extension){
 						case "mp3":
-							trace('adding: '+file.nativePath);
+							trace('onDrop() add file.nativePath: '+file.nativePath);
 							config.addTrack(file.nativePath);
 							break;
 						default:
@@ -363,8 +362,16 @@
 			private function loadSound(currentRandomSong:String):void{
 				trace('shuffle: '+currentRandomSong);
 				var req:URLRequest = new URLRequest(currentRandomSong);
-				songCurrent = new Sound(req);
+				/*//trying to get the app: off the URLRequest under OSX
+				//maybe its possible to open the file and play the bytearray instead
+				var file:File = new File();
+				file = file.resolvePath(currentRandomSong);
+				var req:URLRequest = new URLRequest(file.nativePath);
+				*/
+				songCurrent = new Sound();
+				songCurrent.addEventListener(IOErrorEvent.IO_ERROR, onSoundError);				
 				songCurrent.addEventListener(Event.COMPLETE, onSoundLoaded);
+				songCurrent.load(req);
 			}
 			private function onSoundLoaded(event:Event):void{
 				channel.stop();
@@ -373,6 +380,9 @@
 				songPaused = false;
 				config.savedPosition = 0;
 				randomCover.refreshWith(config.currentRandomSong);
+			}
+			private function onSoundError(event:IOErrorEvent):void{
+				trace("onSoundError(): " + event.text);
 			}
 						
 			
