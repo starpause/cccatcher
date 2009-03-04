@@ -1,10 +1,12 @@
 package model{
 	import flash.filesystem.*;
 	import utils.Rnd;
-	
-	public class Config{
-		public var prefsFile:File; // The preferences prefsFile
-		[Bindable] private var prefsXML:XML; // The XML data
+	//import flash.events.EventDispatcher;// This import is required for Flex 2
+
+	// To avoid binding warnings to "instance" in Flex 2 we need to explicitly extends EventDispatcher and add [Bindable] to the static instance getter. 
+	[Bindable] public class Config /*extends EventDispatcher*/{
+		public var prefsFile:File; // The preferences File
+		private var prefsXML:XML; // The XML data
 		public var stream:FileStream; // The FileStream object used to read and write prefsFile data.
 		
 		public var windowX:int=0;
@@ -15,16 +17,36 @@ package model{
 		public var savedPosition:Number = 0;
 		
 		//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//
+		// SINGLETON ENFORCING
+		//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//
+		private static const _instance:Config = new Config(SingletonLock); // Storage for the singleton instance.
+
+		/** Provides singleton access to the instance. */
+  		public static function get instance():Config{
+			return _instance;
+		}
+		
+		/** @param lock The Singleton lock class to pevent outside instantiation. */
+		public function Config(lock:Class){
+			// Verify that the lock is the correct class reference.
+			if ( lock != SingletonLock ){
+				throw new Error( "Invalid Singleton access, use Config.instance" );
+			}
+			//normal construction continues here
+			init();
+		}
+		
+		//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//
 		// STARTUP AND FILE IO
 		//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//
 		/**
 		 * Called when on app start. Points the prefsFile File object to the cccatcher-config.xml prefsFile in the AIR application store directory, 
 		 * which is uniquely defined for the application. It then calls the readXML() method, which reads the XML data.
 		 */
-		public function Config(){
+		private function init():void{
 			prefsFile = File.applicationStorageDirectory;
 			prefsFile = prefsFile.resolvePath("cccatcher-config.xml");
-			readXML();
+			readXML();			
 		}
 		private function readXML():void {
 			stream = new FileStream();
@@ -214,6 +236,18 @@ package model{
 		}
 		
 		
-	}//end class
-}//end package
+
+	}//Config class
+}//package
+
+/**
+ * SingletonLock is a private class declared outside of the package, accessible to classes inside of the Model.as
+ * file.  Because of that, no outside code is able to get a reference to this class to pass to the constructor, which
+ * enables us to prevent outside instantiation.
+ * 
+ * Singleton setup stolen from http://www.darronschall.com/weblog/2007/11/actionscript-3-singleton-redux.cfm
+ */
+class SingletonLock{
+}
+
 
