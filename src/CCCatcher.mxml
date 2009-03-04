@@ -31,7 +31,7 @@
 			import model.Config;
 			import view.RandomCover;
 			
-            static private var config:Config = new Config();
+            static private var config:Config = Config.instance;
 			private var songCurrent:Sound = new Sound();
 			private var channel:SoundChannel = new SoundChannel();
 			
