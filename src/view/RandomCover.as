@@ -87,7 +87,7 @@ package view{
 		 * 
 		 */
 		private function determineImage():void{
-			trace('possibleImages: '+possibleImages);
+			//trace('possibleImages: '+possibleImages);
 			imageToLoad = possibleImages[Rnd.integer(possibleImages.length)];
 		    var temp:File = File.desktopDirectory.resolvePath(imageToLoad)
 		    if(temp.exists == true)
@@ -99,7 +99,9 @@ package view{
 		// IMAGE LOADING AND HANDLING
 		//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//
 		private function loadImage():void{
-			var imageRequest:URLRequest = new URLRequest(imageToLoad);
+			var file:File = new File();
+			file = file.resolvePath(imageToLoad);
+			var imageRequest:URLRequest = new URLRequest(file.url);
 			imageLoader.unload();
 			imageLoader.contentLoaderInfo.addEventListener(IOErrorEvent.IO_ERROR, onImageError);
 			imageLoader.contentLoaderInfo.addEventListener(Event.COMPLETE, onImageComplete);
