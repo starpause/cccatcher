@@ -79,7 +79,7 @@ package utils {
 		
 	// constructor:
 		public function Rnd(seed:uint=0) {
-			throw(new Error("the Rnd class cannot be instantiated"));
+			throw(new Error("Rnd class should not be instantiated. Access ala Rnd.whateverFunction() after including this class."));
 		}
 	}
 }

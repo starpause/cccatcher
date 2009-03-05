@@ -1,6 +1,7 @@
 package model{
 	import flash.filesystem.*;
 	import utils.Rnd;
+	import utils.FileSystem;
 	//import flash.events.EventDispatcher;// This import is required for Flex 2
 
 	// To avoid binding warnings to "instance" in Flex 2 we need to explicitly extends EventDispatcher and add [Bindable] to the static instance getter. 
@@ -108,24 +109,9 @@ package model{
 		//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//
 		// GETTERS AND SETTERS
 		//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//
-		/**
-		 * assert that the native path exists
-		 */
-		public function nativePathExists(uri:String):Boolean {
-			var pathToFile:File = File.userDirectory.resolvePath(uri)
-			pathToFile = pathToFile.resolvePath(uri);
-			
-			if (pathToFile.exists) {
-				return true;
-			}
-			else{
-				return false;
-			}
-		}
-		
 		public function addTrack(uri:String):void{
 			//make sure the nativePath isn't already in the list
-			if( nativePathAlreadyExists(uri) ){
+			if( trackAlreadyAdded(uri) ){
 				return void;
 			}
 			
@@ -150,7 +136,7 @@ package model{
 			for each (var child:XML in prefsXML.trackList.*) {
 				if(child.@uri == uri){
 					child.@uri = newPath;
-					trace('renamed in xml: '+newPath);
+					//trace('renamed in xml: '+newPath);
 				}
 			}
 		}
@@ -165,11 +151,11 @@ package model{
 			prefsXML.channelState.@currentTrack = currentRandomSong;
 		}
 		
-		private function nativePathAlreadyExists(uri:String):Boolean{
+		private function trackAlreadyAdded(uri:String):Boolean{
 			var baby:Boolean = false;
 			for each (var child:XML in prefsXML.trackList.*) {
 				if(child.@uri == uri){
-					trace('nativePath already exists');
+					//trace('nativePath already exists');
 					baby = true;
 				}
 			}
@@ -204,7 +190,7 @@ package model{
 				return getRandomNativePath();
 			}
 			//bad if the file doesn't exist anymore
-			if(nativePathExists(nextRandomSong) == false){
+			if(FileSystem.nativePathExists(nextRandomSong) == false){
 				delete prefsXML.trackList.children()[rndInt];
 				return getRandomNativePath();
 			}

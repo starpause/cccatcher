@@ -30,6 +30,7 @@
 			
 			import model.Config;
 			import view.RandomCover;
+			import utils.FileSystem;
 			
             static private var config:Config = Config.instance;
 			private var songCurrent:Sound = new Sound();
@@ -126,7 +127,7 @@
 				if(storedRandomSong == ''){return void;}
 				
 				//if the storedRandomSong is exists, play it
-            	if(config.nativePathExists(storedRandomSong) == true){
+            	if(FileSystem.nativePathExists(storedRandomSong) == true){
             		holdingSavedSong = true;
             		randomPlay();
             	}else{//we randomly play a song like usual
@@ -148,7 +149,7 @@
 			 * This function also removes hidden files
 			 * 
 			 * @param files
-			*/		
+			*/
 			private function cleanFileArray(files:Array):Array{
 				var arrayToReturn:Array = new Array();
 				
@@ -183,18 +184,13 @@
 			
 			private function tagCurrentTrack():void{
 				var currentRandomSong:String = config.currentRandomSong;
-				//todo: rename file w/ -gorehole-
-				var renameName:String = currentRandomSong.replace('.mp3', '-dinoaids-.mp3');
-				trace(renameName);
-				
-			    var origFileLoc:File = File.desktopDirectory.resolvePath(currentRandomSong);
-			    origFileLoc.addEventListener(Event.COMPLETE,moveFileListener);
-			    var newFileLoc:File = File.desktopDirectory.resolvePath(renameName);
-			    origFileLoc.moveToAsync(newFileLoc);
-			    config.renameTrack(currentRandomSong, renameName);
-			}
-			private function moveFileListener(event:Event):void{
-			    trace("file moved");
+				if( currentRandomSong.indexOf('-dinoaids-') == -1 ){
+					var renameName:String = currentRandomSong.replace('.mp3', '-dinoaids-.mp3');
+					//trace(renameName);
+					
+					FileSystem.rename(currentRandomSong, renameName);
+					config.renameTrack(currentRandomSong, renameName);
+				}
 			}
 			
 			/**
@@ -211,7 +207,7 @@
 					temp.addEventListener(Event.COMPLETE, deleteFileListener);
 					temp.deleteFileAsync();
 					//config.removeTrack(currentRandomSong);//not 100% necessary since config.randomPlay() will delete any nulls it finds in the tracklist
-					trace('filesystem no longer contains '+currentRandomSong);
+					//trace('filesystem no longer contains '+currentRandomSong);
 				}
 			}
 			
