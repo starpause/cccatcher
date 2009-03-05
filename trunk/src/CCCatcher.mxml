@@ -197,24 +197,11 @@
 			* randomPlay() the next track, delete the file from the filesystem.
 			*/
 			private function deleteCurrentTrack():void{
-				var currentRandomSong:String = config.currentRandomSong;
-				randomPlay();
-			    //todo: remove from XML structure? or should this be handled in the config
-
-				//remove from file system
-			    var temp:File = File.desktopDirectory.resolvePath(currentRandomSong)
-			    if(temp.exists == true){
-					temp.addEventListener(Event.COMPLETE, deleteFileListener);
-					temp.deleteFileAsync();
-					//config.removeTrack(currentRandomSong);//not 100% necessary since config.randomPlay() will delete any nulls it finds in the tracklist
-					//trace('filesystem no longer contains '+currentRandomSong);
-				}
+				var nativePathToNuke:String = config.currentRandomSong;
+				randomPlay();			    
+			    FileSystem.remove(nativePathToNuke);
+				//config.removeTrack(currentRandomSong);//not 100% necessary since config.randomPlay() will delete any nulls it finds in the tracklist
 			}
-			
-			private function deleteFileListener(event:Event):void{
-			}
-            
-			
 
 			//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//
 			// UI HANDLERS
