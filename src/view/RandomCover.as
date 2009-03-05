@@ -120,7 +120,7 @@ package view{
 		 */
 		public function resizeCover(event:Event):void{
 			var scaleBy:Number;
-			trace(event.target.content.width+'x'+event.target.content.height);
+			//trace(event.target.content.width+'x'+event.target.content.height);
 			if(event.target.content.width < event.target.content.height){//if width smaller, scale by width
 				scaleBy = WINDOW_PX / event.target.content.width;
 			}else{//if height smaller, scale by height
