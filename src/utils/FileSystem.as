@@ -31,6 +31,17 @@ package utils{
 		private static function moveFileListener(event:Event):void{
 		    trace('file tagged! event: '+event.toString());
 		}
+		
+		public static function remove(uri:String):void{
+		    var temp:File = File.desktopDirectory.resolvePath(uri)
+		    if(temp.exists == true){
+				temp.addEventListener(Event.COMPLETE, deleteFileListener);
+				temp.deleteFileAsync();
+			}
+		}
+		private static function deleteFileListener(event:Event):void{
+			//trace('filesystem no longer contains '+currentRandomSong);
+		}
 
 		public function FileSystem(){
 			throw(new Error("FileSystem class should not be instantiated. Access ala Filesystem.whateverFunction() after including this class."));
