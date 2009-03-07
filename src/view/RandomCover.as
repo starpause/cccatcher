@@ -9,7 +9,7 @@ package view{
 	import mx.controls.Alert;
 	
 	import utils.Rnd;
-		
+	
 	/**
 	 * Select a random image from the directory of the currently playing mp3.
 	 * Constructor is a dummy, call refreshWith() to get a picture! 

@@ -8,6 +8,8 @@
 	</mx:Style>
     <mx:Script>
         <![CDATA[
+        	import view.HitBox;
+        	import view.Time;
         	import mx.rpc.mxml.Concurrency;
         	import mx.logging.targets.TraceTarget;
             import mx.controls.Alert;
@@ -15,13 +17,15 @@
             import mx.events.DragEvent;
             import flash.events.MouseEvent;
             import mx.controls.Image;
-            import mx.managers.DragManager
+            import mx.managers.DragManager;
             import flash.filesystem.File;
             import flash.events.NativeDragEvent;
 			import flash.desktop.NativeDragManager;
 			import flash.events.NativeDragEvent;
 			import flash.media.Sound;
 			import flash.media.SoundChannel;
+			import flash.events.NativeWindowBoundsEvent;
+			import flash.utils.*;
 						
 			import flash.events.KeyboardEvent;
 			import flash.ui.Keyboard;
@@ -31,21 +35,24 @@
 			import model.Config;
 			import view.RandomCover;
 			import utils.FileSystem;
+			import utils.Utils;
 			
+			[Embed(source='./assets/SWFIT_SL.TTF', fontName='_uni05')]
+			public static var _uni05:Class;
+			
+			private var TRANSPORT_MS:int = 7000;
             static private var config:Config = Config.instance;
-			private var songCurrent:Sound = new Sound();
-			private var channel:SoundChannel = new SoundChannel();
+			private var _songCurrent:Sound = new Sound();
+			private var _channel:SoundChannel = new SoundChannel();
+			private var cm:ContextMenu = new ContextMenu();
 			
 			private var songPaused:Boolean = true;
 			private var songPosition:Number = 0;
 			
 			private var randomCover:RandomCover = new RandomCover();
 			
-			private var star:ContextMenuItem;
-			private var delTrack:ContextMenuItem;
-			private var pause:ContextMenuItem;
-			private var skip:ContextMenuItem;
-			private var quit:ContextMenuItem;
+			private var timeDisplay:Time = new Time();
+			private var hitBox:HitBox = new HitBox();
 			
 			private var shiftKeyDown:Boolean = false;
 			
@@ -54,6 +61,8 @@
 			//double click emulation
 			private var clickNum:Number = 0
 			private var littleTimer:Timer = new Timer(250,1);
+			
+			private var alphaDiv:Sprite = new Sprite();
 
 			//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//
 			// SETUP
@@ -62,53 +71,89 @@
                 stage.nativeWindow.visible = false;
                 this.setStyle("backgroundAlpha", .0);
 				this.alwaysInFront = true;
-                //registerMovementHandler();
 				stage.nativeWindow.addEventListener(Event.CLOSING, windowClosingHandler); 
 				stage.addEventListener(KeyboardEvent.KEY_DOWN,onKeyDown);
-				stage.addEventListener(KeyboardEvent.KEY_UP,onKeyUp);    
+				stage.addEventListener(KeyboardEvent.KEY_UP,onKeyUp);
+				
+				alphaDiv.alpha = .8;
+				alphaDiv.addEventListener(MouseEvent.MOUSE_OVER, onAlphaDivOver);
+				alphaDiv.addEventListener(MouseEvent.MOUSE_OUT, onAlphaDivOut);
+
+				stage.addChild(alphaDiv);
 				
 				//double click emulation
-				littleTimer.addEventListener(TimerEvent.TIMER, doTheClick);
+				littleTimer.addEventListener(TimerEvent.TIMER, onBoxClick);
 				
-				randomCover.buttonMode = true;
-				randomCover.addEventListener(NativeDragEvent.NATIVE_DRAG_ENTER,onDragIn);
-				randomCover.addEventListener(NativeDragEvent.NATIVE_DRAG_DROP,onDrop);
-				randomCover.addEventListener(NativeDragEvent.NATIVE_DRAG_EXIT,onDragExit);
-				randomCover.addEventListener(MouseEvent.MOUSE_DOWN, mouseDrag);
-				randomCover.addEventListener(MouseEvent.CLICK, clickFn);
-				randomCover.alpha = .8;
-				stage.addChild(randomCover);
+				//randomCover.alpha = .8;
+				alphaDiv.addChild(randomCover);
+				
+				//attach sh*t to the hitbox
+				hitBox.buttonMode = true;
+				hitBox.addEventListener(NativeDragEvent.NATIVE_DRAG_ENTER,onDragIn);
+				
+				hitBox.addEventListener(NativeDragEvent.NATIVE_DRAG_DROP,onDrop);
+				hitBox.addEventListener(NativeDragEvent.NATIVE_DRAG_EXIT,onDragExit);
+				hitBox.addEventListener(MouseEvent.MOUSE_DOWN, mouseDrag);
+				//hitBox.addEventListener(MouseEvent.MOUSE_MOVE, onHitMove);
+				hitBox.addEventListener(MouseEvent.CLICK, clickBox);
+				hitBox.contextMenu = cm;
+				alphaDiv.addChild(hitBox);
+				
+				timeDisplay.buttonMode = true;
+				timeDisplay.visible = false;
+				//timeDisplay.useHandCursor = true;//auto display fwd/bak hint text   << >>
+				timeDisplay.x = int(stage.width/2 - timeDisplay.width/2);
+				timeDisplay.y = int(stage.height - 13);
+				timeDisplay.addEventListener(MouseEvent.CLICK, clickTime);
+				timeDisplay.addEventListener(MouseEvent.RIGHT_CLICK, rightClickTime);
+				alphaDiv.addChild(timeDisplay);
+				
 				//clean dead items out of the TrackList
 				configureContextMenu();
 				loadWindowPosition();
+				
+				//start timer for update song position
+				var myTimer:Timer = new Timer(50);
+				myTimer.addEventListener('timer', updateTime);
+				myTimer.start();
+            }
+
+            private function onAlphaDivOver(e:MouseEvent):void{
+            	timeDisplay.visible = true;
+            }
+            
+            private function onAlphaDivOut(e:MouseEvent):void{
+            	timeDisplay.visible = false;//fade it out
             }
             
             private function configureContextMenu():void{
 				stage.showDefaultContextMenu = true;
-				var cm:ContextMenu = new ContextMenu();
 				cm.hideBuiltInItems();
 				/*
 				skip = new ContextMenuItem("Skip");
 				skip.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, onSkipSelect);
 				cm.customItems.push(skip);
 				*/
-				star = new ContextMenuItem("Star");
+				var star:ContextMenuItem = new ContextMenuItem("Star");
 				star.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, onStarSelect);
 				cm.customItems.push(star);
 				
-				delTrack = new ContextMenuItem("Delete");
+				var delTrack:ContextMenuItem = new ContextMenuItem("Delete");
 				delTrack.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, onDeleteSelect);
 				cm.customItems.push(delTrack);
 
-				pause = new ContextMenuItem("Pause");
+				var pause:ContextMenuItem = new ContextMenuItem("Pause");
 				pause.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, onPauseSelect);
 				cm.customItems.push(pause);
 				
-				quit = new ContextMenuItem("Quit");
+				var clear:ContextMenuItem = new ContextMenuItem("Flush");
+				clear.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, onClearSelect);
+				cm.customItems.push(clear);
+
+				var quit:ContextMenuItem = new ContextMenuItem("Quit");
 				quit.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, onQuitSelect);
 				cm.customItems.push(quit);
-				
-				randomCover.contextMenu = cm;
+
             }
                         
             private function loadWindowPosition():void{
@@ -172,12 +217,12 @@
 			private function togglePlay():void{
 				//modify sound?
 				if(songPaused == true){ //is paused, must play
-					channel = songCurrent.play(songPosition);
-					channel.addEventListener(Event.SOUND_COMPLETE, randomPlay);
+					_channel = _songCurrent.play(songPosition);
+					_channel.addEventListener(Event.SOUND_COMPLETE, randomPlay);
 				}
 				else{ //is play, must pause
-					songPosition = channel.position;
-					channel.stop();
+					songPosition = _channel.position;
+					_channel.stop();
 				}
 				songPaused = !songPaused;
 			}
@@ -210,23 +255,34 @@
 			public function onDragIn(event:NativeDragEvent):void{
 			    NativeDragManager.dropAction = NativeDragActions.MOVE;
 			    if(event.clipboard.hasFormat(ClipboardFormats.FILE_LIST_FORMAT)){
-			    	NativeDragManager.acceptDragDrop(randomCover);
+			    	NativeDragManager.acceptDragDrop(hitBox);
 			        //NativeDragManager.acceptDragDrop(this); //'this' is the receiving component
 			    }
 			}
 			public function onDrop(event:NativeDragEvent):void{
 				var dropFiles:Array = event.clipboard.getData(ClipboardFormats.FILE_LIST_FORMAT) as Array;
+				var addedCount:Number = 0;
+				var skipCount:Number = 0;
 				dropFiles = cleanFileArray(dropFiles);
 				for each (var file:File in dropFiles){
 					switch (file.extension){
 						case "mp3":
-							trace('onDrop() add file.nativePath: '+file.nativePath);
-							config.addTrack(file.nativePath);
+							if(file.name.indexOf('.')==0){/*it's a hidden file with the . at the start*/
+								break;
+							}
+							if(config.trackAlreadyAdded(file.nativePath)==false){
+								//trace('onDrop() add file.nativePath: '+file.nativePath);
+								config.addTrack(file.nativePath);
+								addedCount++;
+							}else{
+								skipCount++;
+							}
 							break;
 						default:
 							//trace(file.name+" not a recognised file format"); 
 					}
 				}
+				trace('onDrop() added '+addedCount+', skipped '+skipCount);
 			}
 			public function onDragExit(event:NativeDragEvent):void{
 			    //trace("Drag exit event.");
@@ -234,7 +290,7 @@
 			
 			private function windowClosingHandler(event:Event=null):void {
 				config.saveWindowState(stage.nativeWindow.x, stage.nativeWindow.y);
-				config.saveChannelState(channel.position);
+				config.saveChannelState(_channel.position);
 				config.writeXMLData();
 			}
 
@@ -250,20 +306,24 @@
 				}
 			}
 
-			//for being able to grab the app and drag it around
-			public function registerMovementHandler():void {
-				randomCover.addEventListener( MouseEvent.MOUSE_DOWN, mouseDrag );
-			}
 			public function mouseDrag(event:MouseEvent):void {
 				stage.nativeWindow.startMove();
 			}
 			
+			private function clickTime(event:MouseEvent):void{
+				fastForward();
+			}
+			
+			private function rightClickTime(event:MouseEvent):void{
+				rewind();
+			}
+			
 			//double click emulation
-			private function clickFn(event:MouseEvent):void{
+			private function clickBox(event:MouseEvent):void{
 				clickNum++
 				littleTimer.start()	
 			}
-			private function doTheClick(event:TimerEvent):void{
+			private function onBoxClick(event:TimerEvent):void{
 				if(clickNum == 1){
 					singleClickAction();
 					littleTimer.stop();
@@ -276,26 +336,19 @@
 			}
 			private function singleClickAction():void{
 				if(shiftKeyDown == true){
-					songPosition = channel.position + 20000; //move ahead a magic number of milliseconds
-					channel.stop();
-					if(songCurrent.length > songPosition){
-						channel = songCurrent.play(songPosition);
-						channel.addEventListener(Event.SOUND_COMPLETE, randomPlay);
-						//todo: display currentSeconds/totalSeconds
-						//todo: if currentSeconds > totalSeconds randomPlay()
-						trace('songPosition: '+(int(songPosition/1000))+'/'+(int(songCurrent.length/1000)));
-					}else{
-						randomPlay();
-					}
 				}
 			}
 			private function doubleClickAction():void{
 				if(shiftKeyDown == true){
-					randomCover.refreshWith(config.currentRandomSong);
+					previousPlay();
 				}
 				else{
 					randomPlay();
 				}
+			}
+			
+			private function previousPlay():void{
+				
 			}
 			
 			//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//
@@ -313,13 +366,13 @@
 			private function onSkipSelect(e:ContextMenuEvent=null):void{
 				randomPlay();
 			}
-			private function onDoubleClick(e:Event=null):void{
-				
-			}
 			private function onQuitSelect(e:ContextMenuEvent=null):void{
 				windowClosingHandler();
 				//NativeApplication.nativeApplication.exit();
 				nativeApplication.exit();
+			}
+			private function onClearSelect(e:ContextMenuEvent=null):void{
+				config.removeAllTracks();
 			}
 			private function onConfigSelect(e:ContextMenuEvent=null):void{
 				//todo =(
@@ -344,12 +397,12 @@
 				}
 				
 				//stop currentRandomSong
-				if(channel){
-					channel.stop();
-					channel = null;
+				if(_channel){
+					_channel.stop();
+					_channel = null;
 				}
 				//do a newie
-				channel = new SoundChannel();
+				_channel = new SoundChannel();
 				loadSound(currentRandomSong);
 			}
 			private function loadSound(currentRandomSong:String):void{
@@ -362,15 +415,15 @@
 				file = file.resolvePath(currentRandomSong);
 				var req:URLRequest = new URLRequest(file.url);
 				
-				songCurrent = new Sound();
-				songCurrent.addEventListener(IOErrorEvent.IO_ERROR, onSoundError);				
-				songCurrent.addEventListener(Event.COMPLETE, onSoundLoaded);
-				songCurrent.load(req);
+				_songCurrent = new Sound();
+				_songCurrent.addEventListener(IOErrorEvent.IO_ERROR, onSoundError);				
+				_songCurrent.addEventListener(Event.COMPLETE, onSoundLoaded);
+				_songCurrent.load(req);
 			}
 			private function onSoundLoaded(event:Event):void{
-				channel.stop();
-				channel = songCurrent.play(config.savedPosition);
-				channel.addEventListener(Event.SOUND_COMPLETE, randomPlay);
+				_channel.stop();
+				_channel = _songCurrent.play(config.savedPosition);
+				_channel.addEventListener(Event.SOUND_COMPLETE, randomPlay);
 				songPaused = false;
 				config.savedPosition = 0;
 				randomCover.refreshWith(config.currentRandomSong);
@@ -378,8 +431,39 @@
 			private function onSoundError(event:IOErrorEvent):void{
 				trace("onSoundError(): " + event.text);
 			}
-						
+			private function fastForward():void{
+				songPosition = _channel.position + TRANSPORT_MS; //move ahead a magic number of milliseconds
+				_channel.stop();
+				if(_songCurrent.length > songPosition){
+					_channel = _songCurrent.play(songPosition);
+					_channel.addEventListener(Event.SOUND_COMPLETE, randomPlay);
+					//todo: display currentSeconds/totalSeconds
+					//todo: if currentSeconds > totalSeconds randomPlay()
+					trace('songPosition: '+(int(songPosition/1000))+'/'+(int(_songCurrent.length/1000)));
+				}else{
+					randomPlay();
+				}
+				updateTime();
+			}
+			private function rewind():void{
+				songPosition = _channel.position - TRANSPORT_MS; //move ahead a magic number of milliseconds
+				_channel.stop();
+				if(0 > songPosition){
+					songPosition = 0;
+				}
+				_channel = _songCurrent.play(songPosition);
+				_channel.addEventListener(Event.SOUND_COMPLETE, randomPlay);
+				//todo: display currentSeconds/totalSeconds
+				//todo: if currentSeconds > totalSeconds randomPlay()
+				updateTime();
+			}
 			
+			private function updateTime(e:TimerEvent=null):void{
+				var elapsedSeconds:String = Utils.formatTime(_channel.position/1000);
+				var totalSeconds:String = Utils.formatTime(_songCurrent.length/1000);
+				timeDisplay.display(elapsedSeconds,totalSeconds);
+				//display
+			}			
 
         ]]>
     </mx:Script>
