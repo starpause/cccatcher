@@ -132,6 +132,10 @@ package model{
 			}
 		}
 		
+		public function removeAllTracks():void{
+			delete prefsXML.trackList.*;
+		}
+		
 		public function renameTrack(uri:String, newPath:String):void{
 			for each (var child:XML in prefsXML.trackList.*) {
 				if(child.@uri == uri){
@@ -151,7 +155,7 @@ package model{
 			prefsXML.channelState.@currentTrack = currentRandomSong;
 		}
 		
-		private function trackAlreadyAdded(uri:String):Boolean{
+		public function trackAlreadyAdded(uri:String):Boolean{
 			var baby:Boolean = false;
 			for each (var child:XML in prefsXML.trackList.*) {
 				if(child.@uri == uri){
