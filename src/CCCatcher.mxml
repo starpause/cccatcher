@@ -63,6 +63,7 @@
 			private var littleTimer:Timer = new Timer(250,1);
 			
 			private var alphaDiv:Sprite = new Sprite();
+			private var alphaValue:Number = .8;
 
 			//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//
 			// SETUP
@@ -75,7 +76,7 @@
 				stage.addEventListener(KeyboardEvent.KEY_DOWN,onKeyDown);
 				stage.addEventListener(KeyboardEvent.KEY_UP,onKeyUp);
 				
-				alphaDiv.alpha = .8;
+				alphaDiv.alpha = alphaValue;
 				alphaDiv.addEventListener(MouseEvent.MOUSE_OVER, onAlphaDivOver);
 				alphaDiv.addEventListener(MouseEvent.MOUSE_OUT, onAlphaDivOut);
 
@@ -84,7 +85,7 @@
 				//double click emulation
 				littleTimer.addEventListener(TimerEvent.TIMER, onBoxClick);
 				
-				//randomCover.alpha = .8;
+				//randomCover.alpha = alphaValue;
 				alphaDiv.addChild(randomCover);
 				
 				//attach sh*t to the hitbox
@@ -118,14 +119,6 @@
 				myTimer.start();
             }
 
-            private function onAlphaDivOver(e:MouseEvent):void{
-            	timeDisplay.visible = true;
-            }
-            
-            private function onAlphaDivOut(e:MouseEvent):void{
-            	timeDisplay.visible = false;//fade it out
-            }
-            
             private function configureContextMenu():void{
 				stage.showDefaultContextMenu = true;
 				cm.hideBuiltInItems();
@@ -347,9 +340,16 @@
 				}
 			}
 			
-			private function previousPlay():void{
-				
-			}
+            private function onAlphaDivOver(e:MouseEvent):void{
+            	timeDisplay.visible = true;
+            	alphaDiv.alpha = 1;
+            }
+            
+            private function onAlphaDivOut(e:MouseEvent):void{
+            	timeDisplay.visible = false;//fade it out
+            	alphaDiv.alpha = alphaValue;
+            }
+            
 			
 			//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//
 			// MENU ITEM HANDLERS
@@ -404,6 +404,9 @@
 				//do a newie
 				_channel = new SoundChannel();
 				loadSound(currentRandomSong);
+			}
+			private function previousPlay():void{
+				
 			}
 			private function loadSound(currentRandomSong:String):void{
 				trace('shuffle: '+currentRandomSong);
