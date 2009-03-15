@@ -85,7 +85,7 @@ package model{
 			prefsXML.windowState.@x = windowX;
 			prefsXML.windowState.@y = windowY;
 			prefsXML.channelState.@currentPosition = 0;
-			prefsXML.appendChild('<trackList/>');
+			prefsXML.trackList = "";
 		}
 		
 		/**
@@ -119,8 +119,7 @@ package model{
 			var newNode:XML = <TRACK/>;
 			newNode.@uri = uri;
 			newNode.@playCount = '0';
-			
-			prefsXML.trackList.appendChild(newNode);			
+			prefsXML.trackList.appendChild(newNode);
 		}
 		
 		public function removeTrack(uri:String):void{
