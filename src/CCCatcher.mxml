@@ -233,6 +233,7 @@
 					
 					FileSystem.rename(currentRandomSong, renameName);
 					config.renameTrack(currentRandomSong, renameName);
+					config.currentRandomSong = renameName;
 					nfoDisplay.refreshWith(renameName);
 				}
 			}
