@@ -10,6 +10,7 @@
         <![CDATA[
         	import view.HitBox;
         	import view.Time;
+        	import view.NfoDisplay;
         	import mx.rpc.mxml.Concurrency;
         	import mx.logging.targets.TraceTarget;
             import mx.controls.Alert;
@@ -37,7 +38,10 @@
 			import utils.FileSystem;
 			import utils.Utils;
 			
-			[Embed(source='./assets/SWFIT_SL.TTF', fontName='_uni05')]
+			[Embed(source='./assets/SWFIT_SL.TTF', fontName='_swfit')]
+			public static var _swfit:Class;
+			
+			[Embed(source='./assets/_uni05_53.ttf', fontName='_uni05')]
 			public static var _uni05:Class;
 			
 			private var TRANSPORT_MS:int = 7000;
@@ -52,6 +56,7 @@
 			private var randomCover:RandomCover = new RandomCover();
 			
 			private var timeDisplay:Time = new Time();
+			private var nfoDisplay:NfoDisplay = new NfoDisplay();
 			private var hitBox:HitBox = new HitBox();
 			
 			private var shiftKeyDown:Boolean = false;
@@ -65,9 +70,7 @@
 			private var alphaDiv:Sprite = new Sprite();
 			private var alphaValue:Number = .8;
 
-			//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//
-			// SETUP
-			//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//
+//- SETUP -//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//
             private function init():void {
                 stage.nativeWindow.visible = false;
                 this.setStyle("backgroundAlpha", .0);
@@ -88,6 +91,10 @@
 				//randomCover.alpha = alphaValue;
 				alphaDiv.addChild(randomCover);
 				
+				//nfo display
+				nfoDisplay.visible = false;
+				alphaDiv.addChild(nfoDisplay);
+				
 				//attach sh*t to the hitbox
 				hitBox.buttonMode = true;
 				hitBox.addEventListener(NativeDragEvent.NATIVE_DRAG_ENTER,onDragIn);
@@ -104,7 +111,7 @@
 				timeDisplay.visible = false;
 				//timeDisplay.useHandCursor = true;//auto display fwd/bak hint text   << >>
 				timeDisplay.x = int(stage.width/2 - timeDisplay.width/2);
-				timeDisplay.y = int(stage.height - 13);
+				timeDisplay.y = int(stage.height - 15);
 				timeDisplay.addEventListener(MouseEvent.CLICK, clickTime);
 				timeDisplay.addEventListener(MouseEvent.RIGHT_CLICK, rightClickTime);
 				alphaDiv.addChild(timeDisplay);
@@ -174,9 +181,7 @@
             }
 
 
-			//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//
-			// UTIL
-			//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//
+//- UTIL -//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//
             private function removeDuplicates(tl:Array):Array{
 			    var z:Array = tl.filter(function (a:*,b:int,c:Array):Boolean { return ((z ? z : z = new Array()).indexOf(a) >= 0 ? false : (z.push(a) >= 0)); }, this);
 				return z;             		
@@ -241,9 +246,7 @@
 				//config.removeTrack(currentRandomSong);//not 100% necessary since config.randomPlay() will delete any nulls it finds in the tracklist
 			}
 
-			//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//
-			// UI HANDLERS
-			//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//			
+//- UI HANDLERS -//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//
 			//drag & drop handlers
 			public function onDragIn(event:NativeDragEvent):void{
 			    NativeDragManager.dropAction = NativeDragActions.MOVE;
@@ -341,19 +344,19 @@
 			}
 			
             private function onAlphaDivOver(e:MouseEvent):void{
+            	nfoDisplay.visible = true;
             	timeDisplay.visible = true;
             	alphaDiv.alpha = 1;
             }
             
             private function onAlphaDivOut(e:MouseEvent):void{
+            	nfoDisplay.visible = false
             	timeDisplay.visible = false;//fade it out
             	alphaDiv.alpha = alphaValue;
             }
             
 			
-			//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//
-			// MENU ITEM HANDLERS
-			//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//
+//- MENU ITEM HANDLERS -//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//
 			private function onStarSelect(e:ContextMenuEvent=null):void{
 				tagCurrentTrack();
 			}
@@ -378,9 +381,7 @@
 				//todo =(
 			}
 
-			//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//
-			// SOUND ENGINE
-			//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//
+//- SOUND ENGINE -//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//
 			private function randomPlay(e:Event=null):void{
 				var currentRandomSong:String;
 				//chose a random song. if there are no songs, return
@@ -429,6 +430,7 @@
 				_channel.addEventListener(Event.SOUND_COMPLETE, randomPlay);
 				songPaused = false;
 				config.savedPosition = 0;
+				nfoDisplay.refreshWith(config.currentRandomSong);
 				randomCover.refreshWith(config.currentRandomSong);
 			}
 			private function onSoundError(event:IOErrorEvent):void{
