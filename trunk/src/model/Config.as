@@ -86,7 +86,7 @@ package model{
 			prefsXML.windowState.@x = windowX;
 			prefsXML.windowState.@y = windowY;
 			prefsXML.channelState.@currentPosition = 0;
-			prefsXML.tag.@text = '-cccatcher-';
+			prefsXML.star.@tagText = '-cccatcher-';
 			prefsXML.trackList = "";
 		}
 		
@@ -226,10 +226,10 @@ package model{
 			}
 		}
 		public function get tagCopy():String{
-			if(prefsXML.tag.length==undefined){
-				prefsXML.tag.@text = '-cccatcher-';
+			if(prefsXML.star.@tagText==undefined){
+				prefsXML.star.@tagText = '-cccatcher-';
 			}
-			return prefsXML.tag.@text;
+			return prefsXML.star.@tagText;
 		}
 		
 		
