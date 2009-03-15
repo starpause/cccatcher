@@ -1,7 +1,8 @@
 package model{
 	import flash.filesystem.*;
-	import utils.Rnd;
+	
 	import utils.FileSystem;
+	import utils.Rnd;
 	//import flash.events.EventDispatcher;// This import is required for Flex 2
 
 	// To avoid binding warnings to "instance" in Flex 2 we need to explicitly extends EventDispatcher and add [Bindable] to the static instance getter. 
@@ -85,6 +86,7 @@ package model{
 			prefsXML.windowState.@x = windowX;
 			prefsXML.windowState.@y = windowY;
 			prefsXML.channelState.@currentPosition = 0;
+			prefsXML.tag.@text = '-cccatcher-';
 			prefsXML.trackList = "";
 		}
 		
@@ -222,6 +224,9 @@ package model{
 				trace('reset playcount!');
 				child.@playCount = '0';
 			}
+		}
+		public function get tagCopy():String{
+			return prefsXML.tag.@text;
 		}
 		
 		
