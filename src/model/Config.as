@@ -226,6 +226,9 @@ package model{
 			}
 		}
 		public function get tagCopy():String{
+			if(prefsXML.tag.length==undefined){
+				prefsXML.tag.@text = '-cccatcher-';
+			}
 			return prefsXML.tag.@text;
 		}
 		
