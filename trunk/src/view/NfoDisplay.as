@@ -48,7 +48,7 @@ package view{
 				chopping = nativePathToParse.split('\\');
 			}
 			
-			folderCopy = chopping[chopping.length-2]+' in '+chopping[chopping.length-3];
+			folderCopy = chopping[chopping.length-2]//+' in '+chopping[chopping.length-3];
 			trackCopy = trackCopy.replace('.mp3','');
 			trackCopy = trackCopy.replace('.MP3','');
 			trackCopy = trackCopy.replace('.Mp3','');
