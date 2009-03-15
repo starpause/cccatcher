@@ -7,17 +7,17 @@ package view{
 					
 		public function Time(){
 			this.graphics.beginFill(0xFFFFFF);
-			this.graphics.drawRect(0,4,80,9);//magic
+			this.graphics.drawRect(0,4,80,11);//magic
 			this.graphics.endFill();
 			
-			_elapsedField.defaultTextFormat = new TextFormat("_uni05", 8, 0x000000);
+			_elapsedField.defaultTextFormat = new TextFormat("_swfit", 8, 0x000000);
 			_elapsedField.embedFonts = true;
 			//_elapsedField.antiAliasType = AntiAliasType.ADVANCED; 
 			_elapsedField.autoSize = TextFieldAutoSize.LEFT;
 			_elapsedField.border = false;
 			_elapsedField.selectable = false;
 			//_elapsedField.x = xHandle;
-			//_elapsedField.y = yHandle;
+			_elapsedField.y = -1;
 			//_elapsedField.wordWrap = true;
 			_elapsedField.text = '77:77/77:77';//rollin/*53v7nZ*/
 			addChild(_elapsedField);
