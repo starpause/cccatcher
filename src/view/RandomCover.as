@@ -145,6 +145,7 @@ package view{
 			//trace('panCover achieves '+event.target.content.x+'x'+event.target.content.y);
 		}
 		private function onImageError(event:IOErrorEvent):void{
+			defaultImage.visible = true;
 			trace('IOErrorEvent.IO_ERROR: '+imageToLoad+' from loadImage() in RandomCover');
 		}
 

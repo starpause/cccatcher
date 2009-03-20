@@ -102,6 +102,7 @@
 				hitBox.addEventListener(MouseEvent.MOUSE_DOWN, mouseDrag);
 				//hitBox.addEventListener(MouseEvent.MOUSE_MOVE, onHitMove);
 				hitBox.addEventListener(MouseEvent.CLICK, clickBox);
+				hitBox.addEventListener(MouseEvent.DOUBLE_CLICK, onDoubleClick);
 				hitBox.contextMenu = cm;
 				alphaDiv.addChild(hitBox);
 				
@@ -300,6 +301,9 @@
 			}
 			
 			//double click emulation
+			private function onDoubleClick(event:MouseEvent):void{
+				trace('double click works!');
+			}
 			private function clickBox(event:MouseEvent):void{
 				clickNum++
 				littleTimer.start()	
