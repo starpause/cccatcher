@@ -8,6 +8,7 @@
 	</mx:Style>
     <mx:Script>
         <![CDATA[
+        	import view.SoundEngine;
         	import view.HitBox;
         	import view.Time;
         	import view.NfoDisplay;
@@ -19,12 +20,9 @@
             import flash.events.MouseEvent;
             import mx.controls.Image;
             import mx.managers.DragManager;
-            import flash.filesystem.File;
             import flash.events.NativeDragEvent;
 			import flash.desktop.NativeDragManager;
 			import flash.events.NativeDragEvent;
-			import flash.media.Sound;
-			import flash.media.SoundChannel;
 			import flash.events.NativeWindowBoundsEvent;
 			import flash.utils.*;
 						
@@ -36,6 +34,7 @@
 			import model.Config;
 			import view.RandomCover;
 			import utils.FileSystem;
+            import flash.filesystem.File;
 			import utils.Utils;
 			
 			[Embed(source='./assets/SWFIT_SL.TTF', fontName='_swfit')]
@@ -44,17 +43,12 @@
 			[Embed(source='./assets/_uni05_53.ttf', fontName='_uni05')]
 			public static var _uni05:Class;
 			
-			private var TRANSPORT_MS:int = 7000;
             static private var config:Config = Config.instance;
-			private var _songCurrent:Sound = new Sound();
-			private var _channel:SoundChannel = new SoundChannel();
 			private var cm:ContextMenu = new ContextMenu();
-			
-			private var songPaused:Boolean = true;
-			private var songPosition:Number = 0;
 			
 			private var randomCover:RandomCover = new RandomCover();
 			
+			private var soundEngine:SoundEngine = new SoundEngine();
 			private var timeDisplay:Time = new Time();
 			private var nfoDisplay:NfoDisplay = new NfoDisplay();
 			private var hitBox:HitBox = new HitBox();
@@ -84,6 +78,10 @@
 				alphaDiv.addEventListener(MouseEvent.MOUSE_OUT, onAlphaDivOut);
 
 				stage.addChild(alphaDiv);
+				
+				//
+				soundEngine.addEventListener("SOUND_LOADED", onSoundLoaded);
+				soundEngine.addEventListener("UPDATE_TIME", updateTime);
 				
 				//double click emulation
 				littleTimer.addEventListener(TimerEvent.TIMER, onBoxClick);
@@ -167,16 +165,14 @@
 
             private function erectPlayer():void{
 				var storedRandomSong:String = config.currentRandomSong;
-				
 				//special case: first time app is run there's no song to play =(
 				if(storedRandomSong == ''){return void;}
-				
+								
 				//if the storedRandomSong is exists, play it
             	if(FileSystem.nativePathExists(storedRandomSong) == true){
-            		holdingSavedSong = true;
-            		randomPlay();
+            		soundEngine.randomPlay(storedRandomSong);
             	}else{//we randomly play a song like usual
-            		randomPlay();
+            		soundEngine.randomPlay();
             	}
             }
 
@@ -211,19 +207,6 @@
 				}
 				return arrayToReturn;
 			}
-
-			private function togglePlay():void{
-				//modify sound?
-				if(songPaused == true){ //is paused, must play
-					_channel = _songCurrent.play(songPosition);
-					_channel.addEventListener(Event.SOUND_COMPLETE, randomPlay);
-				}
-				else{ //is play, must pause
-					songPosition = _channel.position;
-					_channel.stop();
-				}
-				songPaused = !songPaused;
-			}
 			
 			private function tagCurrentTrack():void{
 				var currentRandomSong:String = config.currentRandomSong;
@@ -243,7 +226,7 @@
 			*/
 			private function deleteCurrentTrack():void{
 				var nativePathToNuke:String = config.currentRandomSong;
-				randomPlay();			    
+				soundEngine.randomPlay();			    
 			    FileSystem.remove(nativePathToNuke);
 				//config.removeTrack(currentRandomSong);//not 100% necessary since config.randomPlay() will delete any nulls it finds in the tracklist
 			}
@@ -288,7 +271,7 @@
 			
 			private function windowClosingHandler(event:Event=null):void {
 				config.saveWindowState(stage.nativeWindow.x, stage.nativeWindow.y);
-				config.saveChannelState(_channel.position);
+				config.saveChannelState(soundEngine._channel.position);
 				config.writeXMLData();
 			}
 
@@ -309,11 +292,11 @@
 			}
 			
 			private function clickTime(event:MouseEvent):void{
-				fastForward();
+				soundEngine.fastForward();
 			}
 			
 			private function rightClickTime(event:MouseEvent):void{
-				rewind();
+				soundEngine.rewind();
 			}
 			
 			//double click emulation
@@ -338,10 +321,10 @@
 			}
 			private function doubleClickAction():void{
 				if(shiftKeyDown == true){
-					previousPlay();
+					soundEngine.previousPlay();
 				}
 				else{
-					randomPlay();
+					soundEngine.randomPlay();
 				}
 			}
 			
@@ -366,10 +349,10 @@
 				deleteCurrentTrack();
 			}
 			private function onPauseSelect(e:ContextMenuEvent=null):void{
-				togglePlay();
+				soundEngine.togglePlay();
 			}
 			private function onSkipSelect(e:ContextMenuEvent=null):void{
-				randomPlay();
+				soundEngine.randomPlay();
 			}
 			private function onQuitSelect(e:ContextMenuEvent=null):void{
 				windowClosingHandler();
@@ -383,94 +366,18 @@
 				//todo =(
 			}
 
-//- SOUND ENGINE -//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//
-			private function randomPlay(e:Event=null):void{
-				var currentRandomSong:String;
-				//chose a random song. if there are no songs, return
-				if(holdingSavedSong == false){
-					currentRandomSong = config.getRandomSong();
-				}else{
-					currentRandomSong = config.currentRandomSong;
-					holdingSavedSong = false;
-				}
-
-				//special case: first time application is run, lets not freak out
-				if(currentRandomSong == ''){
-					return void;
-				}
-				
-				//stop currentRandomSong
-				if(_channel){
-					_channel.stop();
-					_channel = null;
-				}
-				//do a newie
-				_channel = new SoundChannel();
-				loadSound(currentRandomSong);
-			}
-			private function previousPlay():void{
-				
-			}
-			private function loadSound(currentRandomSong:String):void{
-				trace('shuffle: '+currentRandomSong);
-				
-				//var req:URLRequest = new URLRequest(currentRandomSong);
-				//trying to get the app: off the URLRequest under OSX
-				//maybe its possible to open the file and play the bytearray instead
-				var file:File = new File();
-				file = file.resolvePath(currentRandomSong);
-				var req:URLRequest = new URLRequest(file.url);
-				
-				_songCurrent = new Sound();
-				_songCurrent.addEventListener(IOErrorEvent.IO_ERROR, onSoundError);				
-				_songCurrent.addEventListener(Event.COMPLETE, onSoundLoaded);
-				_songCurrent.load(req);
-			}
-			private function onSoundLoaded(event:Event):void{
-				_channel.stop();
-				_channel = _songCurrent.play(config.savedPosition);
-				_channel.addEventListener(Event.SOUND_COMPLETE, randomPlay);
-				songPaused = false;
-				config.savedPosition = 0;
-				nfoDisplay.refreshWith(config.currentRandomSong);
-				randomCover.refreshWith(config.currentRandomSong);
-			}
-			private function onSoundError(event:IOErrorEvent):void{
-				trace("onSoundError(): " + event.text);
-			}
-			private function fastForward():void{
-				songPosition = _channel.position + TRANSPORT_MS; //move ahead a magic number of milliseconds
-				_channel.stop();
-				if(_songCurrent.length > songPosition){
-					_channel = _songCurrent.play(songPosition);
-					_channel.addEventListener(Event.SOUND_COMPLETE, randomPlay);
-					//todo: display currentSeconds/totalSeconds
-					//todo: if currentSeconds > totalSeconds randomPlay()
-					trace('songPosition: '+(int(songPosition/1000))+'/'+(int(_songCurrent.length/1000)));
-				}else{
-					randomPlay();
-				}
-				updateTime();
-			}
-			private function rewind():void{
-				songPosition = _channel.position - TRANSPORT_MS; //move ahead a magic number of milliseconds
-				_channel.stop();
-				if(0 > songPosition){
-					songPosition = 0;
-				}
-				_channel = _songCurrent.play(songPosition);
-				_channel.addEventListener(Event.SOUND_COMPLETE, randomPlay);
-				//todo: display currentSeconds/totalSeconds
-				//todo: if currentSeconds > totalSeconds randomPlay()
-				updateTime();
-			}
-			
-			private function updateTime(e:TimerEvent=null):void{
-				var elapsedSeconds:String = Utils.formatTime(_channel.position/1000);
-				var totalSeconds:String = Utils.formatTime(_songCurrent.length/1000);
+//- SOUND ENGINE HANDLERS -//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//
+			private function updateTime(e:Event=null):void{
+				var elapsedSeconds:String = Utils.formatTime(soundEngine._channel.position/1000);
+				var totalSeconds:String = Utils.formatTime(soundEngine._songCurrent.length/1000);
 				timeDisplay.display(elapsedSeconds,totalSeconds);
 				//display
-			}			
+			}
+			private function onSoundLoaded(e:Event):void{
+				nfoDisplay.refreshWith(config.currentRandomSong);
+				randomCover.refreshWith(config.currentRandomSong);				
+			}
+			
 
         ]]>
     </mx:Script>
