@@ -1,16 +1,17 @@
 package view{
 	import flash.display.*;
-	import flash.events.MouseEvent;
-	import flash.text.*;
 	import flash.events.Event;
-	import flash.events.EventDispatcher;
-	//double click emulation
+	import flash.events.KeyboardEvent;
+	import flash.events.MouseEvent;
 	import flash.events.TimerEvent;
+	import flash.text.*;
+	import flash.ui.Keyboard;
 	import flash.utils.Timer;
 	
 	public class Time extends Sprite{
 		public var _elapsedField:TextField = new TextField();
-					
+		private var shiftKeyDown:Boolean = false;
+		
 		//double click emulation
 		private var leftClicks:int = 0;
 		//private var rightClicks:int = 0;
@@ -18,7 +19,11 @@ package view{
 //- PUBLIC -//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//-
 		public function Time(){
 			draw();
-			listen();
+			addEventListener( Event.ADDED, init );
+		}
+		
+		private function init(e:Event):void{
+			listen();			
 		}
 		
 		public function display(elapsed:String, total:String):void{
@@ -53,6 +58,10 @@ package view{
 
 			this.addEventListener(MouseEvent.CLICK, onLeftClick);
 			this.addEventListener(MouseEvent.RIGHT_CLICK, onRightClick);
+			
+			stage.addEventListener(KeyboardEvent.KEY_DOWN,onKeyDown);
+			stage.addEventListener(KeyboardEvent.KEY_UP,onKeyUp);
+			
 		}
 		
 //- HANDLERS -//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//-
@@ -72,12 +81,14 @@ package view{
 		}
 
 		private function onLeftClick(e:MouseEvent):void{
-			leftClicks++;
-			clickWindow.start();
+			if(shiftKeyDown)
+				dispatchEvent(new Event("LEFT_SHIFT_CLICK") );			
+			else
+				dispatchEvent(new Event("LEFT_SINGLE_CLICK") );
 		}
 		private function leftSingleClick():void{
-			dispatchEvent(new Event("LEFT_SINGLE_CLICK") );			
 		}
+		
 		private function leftDoubleClick():void{
 			dispatchEvent(new Event("LEFT_DOUBLE_CLICK") );			
 		}
@@ -96,6 +107,16 @@ package view{
 			trace('dubba right');
 			dispatchEvent(new Event("RIGHT_DOUBLE_CLICK") );
 		}*/
-		
+		private function onKeyDown(e:KeyboardEvent):void{
+			if(e.keyCode == Keyboard.SHIFT){
+				shiftKeyDown = true;					
+			}
+		}
+		private function onKeyUp(e:KeyboardEvent):void{
+			if(e.keyCode == Keyboard.SHIFT){
+				shiftKeyDown = false;
+			}
+		}
+	
 	}//class
 }//package

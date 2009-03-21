@@ -25,7 +25,7 @@
 			import flash.events.NativeDragEvent;
 			import flash.events.NativeWindowBoundsEvent;
 			import flash.utils.*;
-						
+			
 			import flash.events.KeyboardEvent;
 			import flash.ui.Keyboard;
 			
@@ -75,6 +75,7 @@
 				
 				alphaDiv.alpha = alphaValue;
 				alphaDiv.addEventListener(MouseEvent.MOUSE_OVER, onAlphaDivOver);
+				alphaDiv.addEventListener(MouseEvent.MOUSE_MOVE, onAlphaDivOver);
 				alphaDiv.addEventListener(MouseEvent.MOUSE_OUT, onAlphaDivOut);
 
 				stage.addChild(alphaDiv);
@@ -111,7 +112,8 @@
 				timeDisplay.x = int(stage.width/2 - timeDisplay.width/2);
 				timeDisplay.y = int(stage.height - 15);
 				timeDisplay.addEventListener("LEFT_SINGLE_CLICK", clickTime);
-				timeDisplay.addEventListener("LEFT_DOUBLE_CLICK", onPauseSelect);
+				timeDisplay.addEventListener("LEFT_SHIFT_CLICK", onPauseSelect);
+				timeDisplay.addEventListener("RIGHT_SHIFT_CLICK", onPauseSelect);
 				timeDisplay.addEventListener("RIGHT_SINGLE_CLICK", rightClickTime);
 				alphaDiv.addChild(timeDisplay);
 				
@@ -172,7 +174,7 @@
 								
 				//if the storedRandomSong is exists, play it
             	if(FileSystem.nativePathExists(storedRandomSong) == true){
-            		soundEngine.randomPlay(storedRandomSong);
+            		soundEngine.play(storedRandomSong);
             	}else{//we randomly play a song like usual
             		soundEngine.randomPlay();
             	}
