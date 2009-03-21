@@ -3,10 +3,9 @@ package model{
 	
 	import utils.FileSystem;
 	import utils.Rnd;
-	//import flash.events.EventDispatcher;// This import is required for Flex 2
 
 	// To avoid binding warnings to "instance" in Flex 2 we need to explicitly extends EventDispatcher and add [Bindable] to the static instance getter. 
-	[Bindable] public class Config /*extends EventDispatcher*/{
+	public class Config{
 		public var prefsFile:File; // The preferences File
 		private var prefsXML:XML; // The XML data
 		public var stream:FileStream; // The FileStream object used to read and write prefsFile data.
