@@ -16,6 +16,8 @@ package view{
 		public var _channel:SoundChannel = new SoundChannel();
 		private	var currentRandomSong:String;
 		private var previousRandomSong:String;
+		private var rewinding:Boolean=false;
+		public var forceTrack:String;
 		
 		public var songPaused:Boolean = true;
 		public var songPosition:Number = 0;
@@ -27,7 +29,7 @@ package view{
 			//modify sound?
 			if(songPaused == true){ //is paused, must play
 				_channel = _songCurrent.play(songPosition);
-				_channel.addEventListener(Event.SOUND_COMPLETE, randomPlay);
+				_channel.addEventListener(Event.SOUND_COMPLETE, play);
 			}else{ //is play, must pause
 				songPosition = _channel.position;
 				_channel.stop();
@@ -36,28 +38,23 @@ package view{
 		}
 		
 		public function play(savedSong:String=''):void{
-			previousRandomSong=currentRandomSong;
-			
-			if(savedSong=='')
+			//push current song onto previousStack
+			if(forceTrack != ''){
+				currentRandomSong=forceTrack;
+				forceTrack='';
+				previousRandomSong=currentRandomSong;//temporary until i get real previous track implemented
+			} else {
+				previousRandomSong=currentRandomSong;
 				currentRandomSong = config.getRandomSong();
-			else
-				currentRandomSong = savedSong;			
+			}
 
 			loadSound();
 		}
 		
-		public function randomPlay(e:Event=null):void{
-			previousRandomSong=currentRandomSong;
-
-			currentRandomSong = config.getRandomSong();
-			loadSound();
-		}
-		
-		public function previousPlay():void{
-			var temp:String;
-			temp=currentRandomSong;
+		public function playPrevious():void{
+			var tempRandom:String=currentRandomSong;
 			currentRandomSong=previousRandomSong;
-			previousRandomSong=temp;
+			previousRandomSong=tempRandom;
 			loadSound();
 		}
 		
@@ -92,10 +89,15 @@ package view{
 		
 		private function onSoundLoaded(event:Event):void{
 			_channel.stop();
-			_channel = _songCurrent.play(config.savedPosition);
-			_channel.addEventListener(Event.SOUND_COMPLETE, randomPlay);
+			
+			if(rewinding==true)
+				config.savedPosition=_songCurrent.length-TRANSPORT_MS;
+			else
+				config.savedPosition=0;
+			
+			_channel = _songCurrent.play(config.savedPosition);				
+			_channel.addEventListener(Event.SOUND_COMPLETE, play);
 			songPaused = false;
-			config.savedPosition = 0;
 			//displatch event 
 			dispatchEvent(new Event("SOUND_LOADED") );
 		}
@@ -110,27 +112,29 @@ package view{
 				return;
 			}
 
-			songPosition = _channel.position + TRANSPORT_MS; //move ahead a magic number of milliseconds
+			//move ahead a magic number of milliseconds
+			songPosition = _channel.position + TRANSPORT_MS; 
 			_channel.stop();
 			if(_songCurrent.length > songPosition){
 				_channel = _songCurrent.play(songPosition);
-				_channel.addEventListener(Event.SOUND_COMPLETE, randomPlay);
+				_channel.addEventListener(Event.SOUND_COMPLETE, play);
 			}else{
-				randomPlay();
+				play();
 			}
 			dispatchEvent(new Event("UPDATE_TIME") );
 		}
 		
 		public function rewind():void{
-			songPosition = _channel.position - TRANSPORT_MS; //move ahead a magic number of milliseconds
+			//move ahead a magic number of milliseconds
+			songPosition = _channel.position - TRANSPORT_MS; 
 			_channel.stop();
 			if(0 > songPosition){
-				songPosition = 0;
+				playPrevious();
+				rewinding=true;
+			}else{
+				_channel = _songCurrent.play(songPosition);
+				_channel.addEventListener(Event.SOUND_COMPLETE, play);
 			}
-			_channel = _songCurrent.play(songPosition);
-			_channel.addEventListener(Event.SOUND_COMPLETE, randomPlay);
-			//todo: display currentSeconds/totalSeconds
-			//todo: if currentSeconds > totalSeconds randomPlay()
 			songPaused = false;
 			dispatchEvent(new Event("UPDATE_TIME") );
 		}
