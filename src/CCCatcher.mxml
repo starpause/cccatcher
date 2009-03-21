@@ -88,11 +88,7 @@
 				
 				//randomCover.alpha = alphaValue;
 				alphaDiv.addChild(randomCover);
-				
-				//nfo display
-				nfoDisplay.visible = false;
-				alphaDiv.addChild(nfoDisplay);
-				
+								
 				//double click emulation
 				clickWindow.addEventListener(TimerEvent.TIMER, clickWindowExpired);
 				//attach sh*t to the hitbox
@@ -103,9 +99,17 @@
 				hitBox.addEventListener(MouseEvent.MOUSE_DOWN, mouseDrag);
 				hitBox.addEventListener(MouseEvent.CLICK, hitBoxLeftClick);
 				hitBox.addEventListener(MouseEvent.RIGHT_CLICK, hitBoxRightClick);
-				hitBox.contextMenu = cm;
+				//hitBox.contextMenu = cm;
 				alphaDiv.addChild(hitBox);
 				
+				//nfo display
+				nfoDisplay.buttonMode = true;
+				nfoDisplay.useHandCursor = false;
+				nfoDisplay.visible = false;
+				nfoDisplay.contextMenu = cm;
+				alphaDiv.addChild(nfoDisplay);
+
+
 				timeDisplay.buttonMode = true;
 				timeDisplay.visible = false;
 				//timeDisplay.useHandCursor = true;//auto display fwd/bak hint text   << >>
@@ -174,9 +178,10 @@
 								
 				//if the storedRandomSong is exists, play it
             	if(FileSystem.nativePathExists(storedRandomSong) == true){
-            		soundEngine.play(storedRandomSong);
+            		soundEngine.forceTrack = storedRandomSong;
+            		soundEngine.play();
             	}else{//we randomly play a song like usual
-            		soundEngine.randomPlay();
+            		soundEngine.play();
             	}
             }
 
@@ -230,7 +235,7 @@
 			*/
 			private function deleteCurrentTrack():void{
 				var nativePathToNuke:String = config.currentRandomSong;
-				soundEngine.randomPlay();			    
+				soundEngine.play();			    
 			    FileSystem.remove(nativePathToNuke);
 				//config.removeTrack(currentRandomSong);//not 100% necessary since config.randomPlay() will delete any nulls it finds in the tracklist
 			}
@@ -335,11 +340,11 @@
 					randomCover.refreshWith(config.currentRandomSong);
 				}
 				else{
-					soundEngine.randomPlay();
+					soundEngine.play();
 				}
 			}
 			private function rightDoubleClick():void{
-				trace('play previous ');
+				onPreviousSelect();
 			}
 			
             private function onAlphaDivOver(e:MouseEvent):void{
@@ -366,7 +371,7 @@
 				soundEngine.togglePlay();
 			}
 			private function onSkipSelect(e:ContextMenuEvent=null):void{
-				soundEngine.randomPlay();
+				soundEngine.play();
 			}
 			private function onQuitSelect(e:ContextMenuEvent=null):void{
 				windowClosingHandler();
@@ -378,6 +383,9 @@
 			}
 			private function onConfigSelect(e:ContextMenuEvent=null):void{
 				//todo =(
+			}
+			private function onPreviousSelect(e:Event=null):void{
+				soundEngine.playPrevious();
 			}
 
 //- SOUND ENGINE HANDLERS -//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//-
