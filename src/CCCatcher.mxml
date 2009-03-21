@@ -58,13 +58,14 @@
 			private var holdingSavedSong:Boolean = false;
 
 			//double click emulation
-			private var clickNum:Number = 0
-			private var littleTimer:Timer = new Timer(250,1);
+			private var leftClicks:int = 0
+			private var rightClicks:int = 0
+			private var clickWindow:Timer = new Timer(250,1);
 			
 			private var alphaDiv:Sprite = new Sprite();
 			private var alphaValue:Number = .8;
 
-//- SETUP -//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//
+//- SETUP -//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//-
             private function init():void {
                 stage.nativeWindow.visible = false;
                 this.setStyle("backgroundAlpha", .0);
@@ -84,8 +85,6 @@
 				soundEngine.addEventListener("SOUND_LOADED", onSoundLoaded);
 				soundEngine.addEventListener("UPDATE_TIME", updateTime);
 				
-				//double click emulation
-				littleTimer.addEventListener(TimerEvent.TIMER, onBoxClick);
 				
 				//randomCover.alpha = alphaValue;
 				alphaDiv.addChild(randomCover);
@@ -94,15 +93,16 @@
 				nfoDisplay.visible = false;
 				alphaDiv.addChild(nfoDisplay);
 				
+				//double click emulation
+				clickWindow.addEventListener(TimerEvent.TIMER, clickWindowExpired);
 				//attach sh*t to the hitbox
 				hitBox.buttonMode = true;
-				hitBox.addEventListener(NativeDragEvent.NATIVE_DRAG_ENTER,onDragIn);
-				
+				hitBox.addEventListener(NativeDragEvent.NATIVE_DRAG_ENTER,onDragIn);				
 				hitBox.addEventListener(NativeDragEvent.NATIVE_DRAG_DROP,onDrop);
 				hitBox.addEventListener(NativeDragEvent.NATIVE_DRAG_EXIT,onDragExit);
 				hitBox.addEventListener(MouseEvent.MOUSE_DOWN, mouseDrag);
-				//hitBox.addEventListener(MouseEvent.MOUSE_MOVE, onHitMove);
-				hitBox.addEventListener(MouseEvent.CLICK, clickBox);
+				hitBox.addEventListener(MouseEvent.CLICK, hitBoxLeftClick);
+				hitBox.addEventListener(MouseEvent.RIGHT_CLICK, hitBoxRightClick);
 				hitBox.contextMenu = cm;
 				alphaDiv.addChild(hitBox);
 				
@@ -181,7 +181,7 @@
             }
 
 
-//- UTIL -//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//
+//- UTIL -//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//-
             private function removeDuplicates(tl:Array):Array{
 			    var z:Array = tl.filter(function (a:*,b:int,c:Array):Boolean { return ((z ? z : z = new Array()).indexOf(a) >= 0 ? false : (z.push(a) >= 0)); }, this);
 				return z;             		
@@ -235,7 +235,7 @@
 				//config.removeTrack(currentRandomSong);//not 100% necessary since config.randomPlay() will delete any nulls it finds in the tracklist
 			}
 
-//- UI HANDLERS -//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//
+//- UI HANDLERS -//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//-
 			//drag & drop handlers
 			public function onDragIn(event:NativeDragEvent):void{
 			    NativeDragManager.dropAction = NativeDragActions.MOVE;
@@ -303,32 +303,43 @@
 				soundEngine.rewind();
 			}
 			
-			private function clickBox(event:MouseEvent):void{
-				clickNum++
-				littleTimer.start()	
+			private function hitBoxLeftClick(event:MouseEvent):void{
+				leftClicks++
+				clickWindow.start()	
 			}
-			private function onBoxClick(event:TimerEvent):void{
-				if(clickNum == 1){
-					singleClickAction();
-					littleTimer.stop();
-					clickNum=0;
-				}else{
-					doubleClickAction();
-					littleTimer.stop();
-					clickNum=0;
+			private function hitBoxRightClick(event:MouseEvent):void{
+				rightClicks++
+				clickWindow.start()	
+			}
+			private function clickWindowExpired(event:TimerEvent):void{
+				if(leftClicks==1){
+					leftSingleClick();
+				}else if(leftClicks > 1){
+					leftDoubleClick();
+				}else if(rightClicks==1){
+					//rightSingleClick();
+				}else if(rightClicks>1){
+					rightDoubleClick();
 				}
+				clickWindow.stop();
+				leftClicks=0;
+				rightClicks=0;
 			}
-			private function singleClickAction():void{
+			
+			private function leftSingleClick():void{
 				if(shiftKeyDown == true){
 				}
 			}
-			private function doubleClickAction():void{
+			private function leftDoubleClick():void{
 				if(shiftKeyDown == true){
 					randomCover.refreshWith(config.currentRandomSong);
 				}
 				else{
 					soundEngine.randomPlay();
 				}
+			}
+			private function rightDoubleClick():void{
+				trace('play previous ');
 			}
 			
             private function onAlphaDivOver(e:MouseEvent):void{
@@ -344,7 +355,7 @@
             }
             
 			
-//- MENU ITEM HANDLERS -//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//
+//- MENU ITEM HANDLERS -//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//-
 			private function onStarSelect(e:ContextMenuEvent=null):void{
 				tagCurrentTrack();
 			}
@@ -369,7 +380,7 @@
 				//todo =(
 			}
 
-//- SOUND ENGINE HANDLERS -//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//
+//- SOUND ENGINE HANDLERS -//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//-
 			private function updateTime(e:Event=null):void{
 				var elapsedSeconds:String = Utils.formatTime(soundEngine._channel.position/1000);
 				var totalSeconds:String = Utils.formatTime(soundEngine._songCurrent.length/1000);
