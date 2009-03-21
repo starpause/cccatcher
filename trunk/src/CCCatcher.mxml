@@ -102,7 +102,6 @@
 				hitBox.addEventListener(MouseEvent.MOUSE_DOWN, mouseDrag);
 				//hitBox.addEventListener(MouseEvent.MOUSE_MOVE, onHitMove);
 				hitBox.addEventListener(MouseEvent.CLICK, clickBox);
-				hitBox.addEventListener(MouseEvent.DOUBLE_CLICK, onDoubleClick);
 				hitBox.contextMenu = cm;
 				alphaDiv.addChild(hitBox);
 				
@@ -111,8 +110,9 @@
 				//timeDisplay.useHandCursor = true;//auto display fwd/bak hint text   << >>
 				timeDisplay.x = int(stage.width/2 - timeDisplay.width/2);
 				timeDisplay.y = int(stage.height - 15);
-				timeDisplay.addEventListener(MouseEvent.CLICK, clickTime);
-				timeDisplay.addEventListener(MouseEvent.RIGHT_CLICK, rightClickTime);
+				timeDisplay.addEventListener("LEFT_SINGLE_CLICK", clickTime);
+				timeDisplay.addEventListener("LEFT_DOUBLE_CLICK", onPauseSelect);
+				timeDisplay.addEventListener("RIGHT_SINGLE_CLICK", rightClickTime);
 				alphaDiv.addChild(timeDisplay);
 				
 				//clean dead items out of the TrackList
@@ -125,14 +125,10 @@
 				myTimer.start();
             }
 
-            private function configureContextMenu():void{
+            private function configureContextMenu():void{            			
 				stage.showDefaultContextMenu = true;
 				cm.hideBuiltInItems();
-				/*
-				skip = new ContextMenuItem("Skip");
-				skip.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, onSkipSelect);
-				cm.customItems.push(skip);
-				*/
+				
 				var star:ContextMenuItem = new ContextMenuItem("Star");
 				star.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, onStarSelect);
 				cm.customItems.push(star);
@@ -141,14 +137,19 @@
 				delTrack.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, onDeleteSelect);
 				cm.customItems.push(delTrack);
 
-				var pause:ContextMenuItem = new ContextMenuItem("Pause");
-				pause.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, onPauseSelect);
-				cm.customItems.push(pause);
-				
 				var clear:ContextMenuItem = new ContextMenuItem("Flush");
 				clear.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, onClearSelect);
 				cm.customItems.push(clear);
 
+				//stars only as a submenu, flush could go in this submenu too
+				/*
+				var subMenu:NativeMenu = new NativeMenu();
+				var starsOnly:NativeMenuItem = new NativeMenuItem("Stars Only");
+				starsOnly.addEventListener(Event.SELECT, onStarsOnly);
+				subMenu.addItem(starsOnly);
+				cm.addSubmenu(subMenu,"Playlist");
+				*/
+				
 				var quit:ContextMenuItem = new ContextMenuItem("Quit");
 				quit.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, onQuitSelect);
 				cm.customItems.push(quit);
@@ -292,18 +293,14 @@
 				stage.nativeWindow.startMove();
 			}
 			
-			private function clickTime(event:MouseEvent):void{
+			private function clickTime(e:Event):void{
 				soundEngine.fastForward();
 			}
 			
-			private function rightClickTime(event:MouseEvent):void{
+			private function rightClickTime(e:Event):void{
 				soundEngine.rewind();
 			}
 			
-			//double click emulation
-			private function onDoubleClick(event:MouseEvent):void{
-				trace('double click works!');
-			}
 			private function clickBox(event:MouseEvent):void{
 				clickNum++
 				littleTimer.start()	
@@ -325,7 +322,7 @@
 			}
 			private function doubleClickAction():void{
 				if(shiftKeyDown == true){
-					soundEngine.previousPlay();
+					randomCover.refreshWith(config.currentRandomSong);
 				}
 				else{
 					soundEngine.randomPlay();
@@ -352,7 +349,7 @@
 			private function onDeleteSelect(e:ContextMenuEvent=null):void{
 				deleteCurrentTrack();
 			}
-			private function onPauseSelect(e:ContextMenuEvent=null):void{
+			private function onPauseSelect(e:Event=null):void{
 				soundEngine.togglePlay();
 			}
 			private function onSkipSelect(e:ContextMenuEvent=null):void{

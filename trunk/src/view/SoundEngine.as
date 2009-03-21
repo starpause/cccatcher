@@ -91,14 +91,16 @@ package view{
 		}
 		
 		public function fastForward():void{
+			if(songPaused==true){
+				togglePlay();
+				return;
+			}
+
 			songPosition = _channel.position + TRANSPORT_MS; //move ahead a magic number of milliseconds
 			_channel.stop();
 			if(_songCurrent.length > songPosition){
 				_channel = _songCurrent.play(songPosition);
 				_channel.addEventListener(Event.SOUND_COMPLETE, randomPlay);
-				//todo: display currentSeconds/totalSeconds
-				//todo: if currentSeconds > totalSeconds randomPlay()
-				trace('songPosition: '+(int(songPosition/1000))+'/'+(int(_songCurrent.length/1000)));
 			}else{
 				randomPlay();
 			}
@@ -115,6 +117,7 @@ package view{
 			_channel.addEventListener(Event.SOUND_COMPLETE, randomPlay);
 			//todo: display currentSeconds/totalSeconds
 			//todo: if currentSeconds > totalSeconds randomPlay()
+			songPaused = false;
 			dispatchEvent(new Event("UPDATE_TIME") );
 		}
 		
