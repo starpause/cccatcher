@@ -15,6 +15,7 @@ package view{
 		public var _songCurrent:Sound = new Sound();
 		public var _channel:SoundChannel = new SoundChannel();
 		private	var currentRandomSong:String;
+		private var previousRandomSong:String;
 		
 		public var songPaused:Boolean = true;
 		public var songPosition:Number = 0;
@@ -27,19 +28,41 @@ package view{
 			if(songPaused == true){ //is paused, must play
 				_channel = _songCurrent.play(songPosition);
 				_channel.addEventListener(Event.SOUND_COMPLETE, randomPlay);
-			}
-			else{ //is play, must pause
+			}else{ //is play, must pause
 				songPosition = _channel.position;
 				_channel.stop();
 			}
 			songPaused = !songPaused;
 		}
 		
-		public function randomPlay(savedSong:String=''):void{
+		public function play(savedSong:String=''):void{
+			previousRandomSong=currentRandomSong;
+			
 			if(savedSong=='')
 				currentRandomSong = config.getRandomSong();
 			else
-				currentRandomSong = savedSong;
+				currentRandomSong = savedSong;			
+
+			loadSound();
+		}
+		
+		public function randomPlay(e:Event=null):void{
+			previousRandomSong=currentRandomSong;
+
+			currentRandomSong = config.getRandomSong();
+			loadSound();
+		}
+		
+		public function previousPlay():void{
+			var temp:String;
+			temp=currentRandomSong;
+			currentRandomSong=previousRandomSong;
+			previousRandomSong=temp;
+			loadSound();
+		}
+		
+		private function loadSound():void{
+			trace('shuffle: '+currentRandomSong);
 			
 			//special case: first time application is run, lets not freak out
 			if(currentRandomSong == ''){
@@ -53,15 +76,6 @@ package view{
 			}
 			//do a newie
 			_channel = new SoundChannel();
-			loadSound(currentRandomSong);
-		}
-		
-		public function previousPlay():void{
-			
-		}
-		
-		private function loadSound(currentRandomSong:String):void{
-			trace('shuffle: '+currentRandomSong);
 			
 			//var req:URLRequest = new URLRequest(currentRandomSong);
 			//trying to get the app: off the URLRequest under OSX
