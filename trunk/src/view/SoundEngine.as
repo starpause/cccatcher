@@ -14,7 +14,7 @@ package view{
 		private var TRANSPORT_MS:int = 7000;
 		public var _songCurrent:Sound = new Sound();
 		public var _channel:SoundChannel = new SoundChannel();
-		private	var currentRandomSong:String;
+		private	var currentRandomSong:String = '';
 		private var previousRandomSong:String;
 		private var rewinding:Boolean=false;
 		public var forceTrack:String;
@@ -37,17 +37,23 @@ package view{
 			songPaused = !songPaused;
 		}
 		
-		public function play(savedSong:String=''):void{
-			//push current song onto previousStack
-			if(forceTrack != ''){
+		/**
+		 * if a forceTrack has been injected or set, play that back. otherwise, grab a random track to play
+		 * 
+		 */
+		public function play():void{
+			if(forceTrack == '' || forceTrack == null){
+				previousRandomSong=currentRandomSong;
+				currentRandomSong = config.getRandomSong();
+				config.savedPosition=0;
+			} else {
 				currentRandomSong=forceTrack;
 				forceTrack='';
 				previousRandomSong=currentRandomSong;//temporary until i get real previous track implemented
-			} else {
-				previousRandomSong=currentRandomSong;
-				currentRandomSong = config.getRandomSong();
 			}
 
+			//make sure a track exists before loading it?
+			//as is logic else where should ensure that the currentRandomSong exists but it's easy to break
 			loadSound();
 		}
 		
@@ -92,8 +98,6 @@ package view{
 			
 			if(rewinding==true)
 				config.savedPosition=_songCurrent.length-TRANSPORT_MS;
-			else
-				config.savedPosition=0;
 			
 			_channel = _songCurrent.play(config.savedPosition);				
 			_channel.addEventListener(Event.SOUND_COMPLETE, play);
