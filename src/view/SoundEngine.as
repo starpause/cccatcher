@@ -41,7 +41,7 @@ package view{
 		 * if a forceTrack has been injected or set, play that back. otherwise, grab a random track to play
 		 * 
 		 */
-		public function play():void{
+		public function play(e:Event=null):void{
 			if(forceTrack == '' || forceTrack == null){
 				previousRandomSong=currentRandomSong;
 				currentRandomSong = config.getRandomSong();
