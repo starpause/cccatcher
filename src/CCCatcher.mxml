@@ -235,8 +235,13 @@
 			*/
 			private function deleteCurrentTrack():void{
 				var nativePathToNuke:String = config.currentRandomSong;
-				soundEngine.play();			    
-			    FileSystem.remove(nativePathToNuke);
+				soundEngine.play();
+				
+				var tempFile:File = new File(nativePathToNuke);
+				//tempFile = tempFile.resolvePath(nativePathToNuke);
+				tempFile.moveToTrashAsync();
+
+			    //FileSystem.remove(nativePathToNuke);
 				//config.removeTrack(currentRandomSong);//not 100% necessary since config.randomPlay() will delete any nulls it finds in the tracklist
 			}
 
