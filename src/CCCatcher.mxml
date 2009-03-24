@@ -44,23 +44,23 @@
 			public static var _uni05:Class;
 			
             static private var config:Config = Config.instance;
+
 			private var cm:ContextMenu = new ContextMenu();
 			
-			private var randomCover:RandomCover = new RandomCover();
-			
+			private var randomCover:RandomCover = new RandomCover();			
 			private var soundEngine:SoundEngine = new SoundEngine();
 			private var timeDisplay:Time = new Time();
 			private var nfoDisplay:NfoDisplay = new NfoDisplay();
 			private var hitBox:HitBox = new HitBox();
 			
-			private var shiftKeyDown:Boolean = false;
-			
-			private var holdingSavedSong:Boolean = false;
-
 			//double click emulation
 			private var leftClicks:int = 0
 			private var rightClicks:int = 0
 			private var clickWindow:Timer = new Timer(250,1);
+			private var waitToDrag:Timer = new Timer(50,1);
+			private var shiftKeyDown:Boolean = false;
+			private var mouseLeftDown:Boolean = false;
+			private var mouseRightDown:Boolean = false;
 			
 			private var alphaDiv:Sprite = new Sprite();
 			private var alphaValue:Number = .8;
@@ -96,9 +96,11 @@
 				hitBox.addEventListener(NativeDragEvent.NATIVE_DRAG_ENTER,onDragIn);				
 				hitBox.addEventListener(NativeDragEvent.NATIVE_DRAG_DROP,onDrop);
 				hitBox.addEventListener(NativeDragEvent.NATIVE_DRAG_EXIT,onDragExit);
-				hitBox.addEventListener(MouseEvent.MOUSE_DOWN, mouseDrag);
-				hitBox.addEventListener(MouseEvent.CLICK, hitBoxLeftClick);
-				hitBox.addEventListener(MouseEvent.RIGHT_CLICK, hitBoxRightClick);
+				hitBox.addEventListener(MouseEvent.MOUSE_DOWN, hitBoxLeftDown);
+				hitBox.addEventListener(MouseEvent.MOUSE_UP, hitBoxLeftUp);
+				//hitBox.addEventListener(MouseEvent.CLICK, hitBoxLeftClick);
+				hitBox.addEventListener(MouseEvent.RIGHT_MOUSE_DOWN, hitBoxRightDown);
+				hitBox.addEventListener(MouseEvent.RIGHT_MOUSE_UP, hitBoxRightUp);
 				//hitBox.contextMenu = cm;
 				alphaDiv.addChild(hitBox);
 				
@@ -135,6 +137,10 @@
 				stage.showDefaultContextMenu = true;
 				cm.hideBuiltInItems();
 				
+				/*var pause:ContextMenuItem = new ContextMenuItem("Pause");
+				pause.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, onPauseSelect);
+				cm.customItems.push(pause);*/
+
 				var star:ContextMenuItem = new ContextMenuItem("Star");
 				star.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, onStarSelect);
 				cm.customItems.push(star);
@@ -179,9 +185,9 @@
 				//if the storedRandomSong is exists, play it
             	if(FileSystem.nativePathExists(storedRandomSong) == true){
             		soundEngine.forceTrack = storedRandomSong;
-            		soundEngine.play();
+            		soundEngine.playNext();
             	}else{//we randomly play a song like usual
-            		soundEngine.play();
+            		soundEngine.playNext();
             	}
             }
 
@@ -235,7 +241,7 @@
 			*/
 			private function deleteCurrentTrack():void{
 				var nativePathToNuke:String = config.currentRandomSong;
-				soundEngine.play();
+				soundEngine.playNext();
 				
 				var tempFile:File = new File(nativePathToNuke);
 				//tempFile = tempFile.resolvePath(nativePathToNuke);
@@ -301,8 +307,36 @@
 				}
 			}
 
-			public function mouseDrag(event:MouseEvent):void {
+			public function mouseDrag(e:Event):void {
 				stage.nativeWindow.startMove();
+			}
+			
+			private function hitBoxRightDown(event:MouseEvent):void{
+				//trace('R down');
+				if(mouseLeftDown==true){onPauseSelect()}
+				rightClicks++
+				clickWindow.start()
+				mouseRightDown=true;
+			}
+			private function hitBoxLeftDown(e:MouseEvent):void{
+				//trace('L down');
+				if(mouseRightDown==true){onPauseSelect()}
+				mouseLeftDown=true;
+				
+				waitToDrag.addEventListener(TimerEvent.TIMER, mouseDrag);
+				waitToDrag.start();
+				
+				leftClicks++
+				clickWindow.start()				
+			}
+			private function hitBoxLeftUp(e:MouseEvent):void{
+				//trace('L up');
+				waitToDrag.stop();
+				mouseLeftDown=false;
+			}
+			private function hitBoxRightUp(e:MouseEvent):void{
+				//trace('R up');
+				mouseRightDown=false;
 			}
 			
 			private function clickTime(e:Event):void{
@@ -315,11 +349,7 @@
 			
 			private function hitBoxLeftClick(event:MouseEvent):void{
 				leftClicks++
-				clickWindow.start()	
-			}
-			private function hitBoxRightClick(event:MouseEvent):void{
-				rightClicks++
-				clickWindow.start()	
+				clickWindow.start()
 			}
 			private function clickWindowExpired(event:TimerEvent):void{
 				if(leftClicks==1){
@@ -345,7 +375,7 @@
 					randomCover.refreshWith(config.currentRandomSong);
 				}
 				else{
-					soundEngine.play();
+					soundEngine.playNext();
 				}
 			}
 			private function rightDoubleClick():void{
@@ -373,10 +403,12 @@
 				deleteCurrentTrack();
 			}
 			private function onPauseSelect(e:Event=null):void{
+				this.mouseLeftDown=false;
+				this.mouseRightDown=false;
 				soundEngine.togglePlay();
 			}
 			private function onSkipSelect(e:ContextMenuEvent=null):void{
-				soundEngine.play();
+				soundEngine.playNext();
 			}
 			private function onQuitSelect(e:ContextMenuEvent=null):void{
 				windowClosingHandler();

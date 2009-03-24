@@ -19,7 +19,7 @@ package view{
 		private var rewinding:Boolean=false;
 		public var forceTrack:String;
 		
-		public var songPaused:Boolean = true;
+		public var songPaused:Boolean = false;
 		public var songPosition:Number = 0;
 		
 		public function SoundEngine(){
@@ -29,7 +29,7 @@ package view{
 			//modify sound?
 			if(songPaused == true){ //is paused, must play
 				_channel = _songCurrent.play(songPosition);
-				_channel.addEventListener(Event.SOUND_COMPLETE, play);
+				_channel.addEventListener(Event.SOUND_COMPLETE, playNext);
 			}else{ //is play, must pause
 				songPosition = _channel.position;
 				_channel.stop();
@@ -41,7 +41,12 @@ package view{
 		 * if a forceTrack has been injected or set, play that back. otherwise, grab a random track to play
 		 * 
 		 */
-		public function play(e:Event=null):void{
+		public function playNext(e:Event=null):void{
+			if(songPaused==true){
+				this.togglePlay();
+				return;
+			}
+			
 			if(forceTrack == '' || forceTrack == null){
 				previousRandomSong=currentRandomSong;
 				currentRandomSong = config.getRandomSong();
@@ -96,11 +101,13 @@ package view{
 		private function onSoundLoaded(event:Event):void{
 			_channel.stop();
 			
-			if(rewinding==true)
+			if(rewinding==true){
 				config.savedPosition=_songCurrent.length-TRANSPORT_MS;
+				rewinding=false;
+			}
 			
 			_channel = _songCurrent.play(config.savedPosition);				
-			_channel.addEventListener(Event.SOUND_COMPLETE, play);
+			_channel.addEventListener(Event.SOUND_COMPLETE, playNext);
 			songPaused = false;
 			//displatch event 
 			dispatchEvent(new Event("SOUND_LOADED") );
@@ -121,9 +128,9 @@ package view{
 			_channel.stop();
 			if(_songCurrent.length > songPosition){
 				_channel = _songCurrent.play(songPosition);
-				_channel.addEventListener(Event.SOUND_COMPLETE, play);
+				_channel.addEventListener(Event.SOUND_COMPLETE, playNext);
 			}else{
-				play();
+				playNext();
 			}
 			dispatchEvent(new Event("UPDATE_TIME") );
 		}
@@ -137,7 +144,7 @@ package view{
 				rewinding=true;
 			}else{
 				_channel = _songCurrent.play(songPosition);
-				_channel.addEventListener(Event.SOUND_COMPLETE, play);
+				_channel.addEventListener(Event.SOUND_COMPLETE, playNext);
 			}
 			songPaused = false;
 			dispatchEvent(new Event("UPDATE_TIME") );
