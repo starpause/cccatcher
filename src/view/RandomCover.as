@@ -26,6 +26,8 @@ package view{
 		private var imageToLoad:String;
 		private var WINDOW_PX:int = 128;
 		private var defaultImage:Bitmap;
+		private var imageLoaderNew:Loader = new Loader();
+		private var imageLoaderOld:Loader = new Loader();
 		private var imageLoader:Loader = new Loader();
 
 		public function RandomCover(){
@@ -95,14 +97,13 @@ package view{
 		}
 		
 		
-		//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//
-		// IMAGE LOADING AND HANDLING
-		//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//
+//- IMAGE LOADING AND HANDLING --//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//
 		private function loadImage():void{
 			var file:File = new File();
 			file = file.resolvePath(imageToLoad);
 			var imageRequest:URLRequest = new URLRequest(file.url);
 			imageLoader.unload();
+			defaultImage.visible = true;
 			imageLoader.contentLoaderInfo.addEventListener(IOErrorEvent.IO_ERROR, onImageError);
 			imageLoader.contentLoaderInfo.addEventListener(Event.COMPLETE, onImageComplete);
 			imageLoader.load(imageRequest);
