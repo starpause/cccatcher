@@ -46,11 +46,6 @@ package view{
 		 * 
 		 */
 		public function playNext(e:Event=null):void{
-			if(songPaused==true){
-				this.togglePlay();
-				return;
-			}
-
 			backStack.push(currentRandomSong);			
 			
 			//decide what to play next
