@@ -4,7 +4,6 @@ package model{
 	import utils.FileSystem;
 	import utils.Rnd;
 
-	// To avoid binding warnings to "instance" in Flex 2 we need to explicitly extends EventDispatcher and add [Bindable] to the static instance getter. 
 	public class Config{
 		public var prefsFile:File; // The preferences File
 		private var prefsXML:XML; // The XML data
@@ -17,9 +16,7 @@ package model{
 		public var currentRandomSong:String = "";
 		public var savedPosition:Number = 0;
 		
-		//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//
-		// SINGLETON ENFORCING
-		//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//
+//- SINGLETON ENFORCING --//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//
 		private static const _instance:Config = new Config(SingletonLock); // Storage for the singleton instance.
 
 		/** Provides singleton access to the instance. */
@@ -37,9 +34,7 @@ package model{
 			init();
 		}
 		
-		//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//
-		// STARTUP AND FILE IO
-		//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//
+//- STARTUP AND FILE IO --//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//
 		/**
 		 * Called when on app start. Points the prefsFile File object to the cccatcher-config.xml prefsFile in the AIR application store directory, 
 		 * which is uniquely defined for the application. It then calls the readXML() method, which reads the XML data.
@@ -107,9 +102,7 @@ package model{
 			stream.close();
 		}
 
-		//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//
-		// GETTERS AND SETTERS
-		//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//
+//- GETTERS AND SETTERS --//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//
 		public function addTrack(uri:String):void{
 			//make sure the nativePath isn't already in the list
 			if( trackAlreadyAdded(uri) ){
@@ -224,6 +217,7 @@ package model{
 				child.@playCount = '0';
 			}
 		}
+		
 		public function get tagCopy():String{
 			if(prefsXML.star.@tagText==undefined){
 				prefsXML.star.@tagText = '-cccatcher-';

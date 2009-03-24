@@ -15,12 +15,16 @@ package view{
 		public var _songCurrent:Sound = new Sound();
 		public var _channel:SoundChannel = new SoundChannel();
 		private	var currentRandomSong:String = '';
-		private var previousRandomSong:String;
-		private var rewinding:Boolean=false;
 		public var forceTrack:String;
 		
 		public var songPaused:Boolean = false;
 		public var songPosition:Number = 0;
+
+		private var previousRandomSong:String;
+		private var rewinding:Boolean=false;
+		private var backStack:Array = new Array;
+		private var nextStack:Array = new Array;
+
 		
 		public function SoundEngine(){
 		}
@@ -46,15 +50,25 @@ package view{
 				this.togglePlay();
 				return;
 			}
+
+			backStack.push(currentRandomSong);			
 			
+			//decide what to play next
 			if(forceTrack == '' || forceTrack == null){
-				previousRandomSong=currentRandomSong;
-				currentRandomSong = config.getRandomSong();
-				config.savedPosition=0;
+				if(nextStack.length>0){
+					//we are seeking forward through the nextStack after having seeked backward
+					currentRandomSong = nextStack.pop();
+					config.currentRandomSong=currentRandomSong;
+					config.savedPosition=0;
+				} else {
+					//we are free to random
+					currentRandomSong = config.getRandomSong();
+					config.savedPosition=0;
+				}
 			} else {
+				//we were told to play a specific track by having the public forceTrack set
 				currentRandomSong=forceTrack;
 				forceTrack='';
-				previousRandomSong=currentRandomSong;//temporary until i get real previous track implemented
 			}
 
 			//make sure a track exists before loading it?
@@ -63,10 +77,13 @@ package view{
 		}
 		
 		public function playPrevious():void{
-			var tempRandom:String=currentRandomSong;
-			currentRandomSong=previousRandomSong;
-			config.currentRandomSong=currentRandomSong;
-			previousRandomSong=tempRandom;
+			if(backStack.length>1){
+				nextStack.push(currentRandomSong);
+				currentRandomSong=backStack.pop();
+				config.currentRandomSong=currentRandomSong;
+			}else{
+				trace('backStack empty');
+			}
 			loadSound();
 		}
 		
