@@ -70,7 +70,7 @@ package view{
 			var fileExtension:String;
 			for (var i:int = 0; i < currentNodes.length; i++){
 				node = currentNodes[i];	
-				if(node.extension == 'jpg'){
+				if( (node.extension == 'jpg' || node.extension == 'JPG') && node.name.charAt(0) != '.'){
 					possibleImages.push(node.nativePath);
 				}
 			}

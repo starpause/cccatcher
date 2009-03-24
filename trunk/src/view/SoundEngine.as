@@ -65,6 +65,7 @@ package view{
 		public function playPrevious():void{
 			var tempRandom:String=currentRandomSong;
 			currentRandomSong=previousRandomSong;
+			config.currentRandomSong=currentRandomSong;
 			previousRandomSong=tempRandom;
 			loadSound();
 		}
