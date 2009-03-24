@@ -379,7 +379,12 @@
 				}
 			}
 			private function rightDoubleClick():void{
-				onPreviousSelect();
+				if(shiftKeyDown == true){
+					//move current image to trash
+				}
+				else{
+					onPreviousSelect();
+				}
 			}
 			
             private function onAlphaDivOver(e:MouseEvent):void{
