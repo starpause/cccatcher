@@ -26,6 +26,10 @@
 			import flash.events.NativeWindowBoundsEvent;
 			import flash.utils.*;
 			
+			import gs.TweenLite;
+			import gs.easing.*;
+			import gs.plugins.AutoAlphaPlugin;
+			
 			import flash.events.KeyboardEvent;
 			import flash.ui.Keyboard;
 			
@@ -388,15 +392,23 @@
 			}
 			
             private function onAlphaDivOver(e:MouseEvent):void{
-            	nfoDisplay.visible = true;
+            	TweenLite.killTweensOf(nfoDisplay);
+            	nfoDisplay.visible=true;
+            	nfoDisplay.alpha=1
+
+            	TweenLite.killTweensOf(timeDisplay);
             	timeDisplay.visible = true;
+            	timeDisplay.alpha=1;
+
+            	TweenLite.killTweensOf(alphaDiv);
             	alphaDiv.alpha = 1;
             }
             
             private function onAlphaDivOut(e:MouseEvent):void{
-            	nfoDisplay.visible = false
-            	timeDisplay.visible = false;//fade it out
-            	alphaDiv.alpha = alphaValue;
+            	//tween out
+            	TweenLite.to(nfoDisplay, 2, {autoAlpha:0, ease:Expo.easeOut});
+            	TweenLite.to(timeDisplay, 2, {autoAlpha:0, ease:Expo.easeOut});
+            	TweenLite.to(alphaDiv, 5, {alpha:alphaValue, ease:Expo.easeOut});
             }
             
 			
