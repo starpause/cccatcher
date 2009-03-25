@@ -32,7 +32,9 @@ package view{
 
 		public function RandomCover(){
 			defaultImage = new DefaultImage();
-			addChild(defaultImage); 			
+			addChild(defaultImage); 
+			addChild(imageLoaderOld);
+			addChild(imageLoaderNew);			
 		}
 		
 		public function refreshWith(nativePathToParse:String):void{
@@ -79,7 +81,10 @@ package view{
 			if(possibleImages.length > 0){
 				determineImage();
 			}else{
-				imageLoader.unload();
+				imageLoaderOld.unload();
+				imageLoaderOld.visible=false;
+				imageLoaderNew.unload();
+				imageLoaderNew.visible=false;
 				defaultImage.visible = true;
 			}
 		}
@@ -102,17 +107,25 @@ package view{
 			var file:File = new File();
 			file = file.resolvePath(imageToLoad);
 			var imageRequest:URLRequest = new URLRequest(file.url);
-			imageLoader.unload();
-			defaultImage.visible = true;
-			imageLoader.contentLoaderInfo.addEventListener(IOErrorEvent.IO_ERROR, onImageError);
-			imageLoader.contentLoaderInfo.addEventListener(Event.COMPLETE, onImageComplete);
-			imageLoader.load(imageRequest);
-			addChild(imageLoader);
+			
+			//swop
+			imageLoaderOld.unload();
+			imageLoaderOld = imageLoaderNew;
+			imageLoaderOld.visible=true;
+			imageLoaderNew.visible=false;
+			
+			//fill new
+			imageLoaderNew.unload();			
+			imageLoaderNew.contentLoaderInfo.addEventListener(IOErrorEvent.IO_ERROR, onImageError);
+			imageLoaderNew.contentLoaderInfo.addEventListener(Event.COMPLETE, onImageComplete);
+			imageLoaderNew.load(imageRequest);
 		}
 		private function onImageComplete(event:Event):void{
 			defaultImage.visible = false;
 			resizeCover(event);
 			panCover(event);
+			imageLoaderOld.visible=false;
+			imageLoaderNew.visible=true;			
 		}
 		/**
 		 * Make sure the window will be covered 100%  
