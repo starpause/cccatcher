@@ -80,6 +80,7 @@ package view{
 			}else{
 				songPosition=0;
 				config.savedPosition=0;
+				rewinding=false;
 				trace('backStack empty');
 			}
 			loadSound();
@@ -156,8 +157,8 @@ package view{
 			songPosition = _channel.position - TRANSPORT_MS; 
 			_channel.stop();
 			if(0 > songPosition){
-				playPrevious();
 				rewinding=true;
+				playPrevious();
 			}else{
 				_channel = _songCurrent.play(songPosition);
 				_channel.addEventListener(Event.SOUND_COMPLETE, playNext);

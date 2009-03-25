@@ -58,8 +58,8 @@
 			private var hitBox:HitBox = new HitBox();
 			
 			//double click emulation
-			private var leftClicks:int = 0
-			private var rightClicks:int = 0
+			private var leftClicks:int = 0;
+			private var rightClicks:int = 0;
 			private var clickWindow:Timer = new Timer(250,1);
 			private var waitToDrag:Timer = new Timer(50,1);
 			private var shiftKeyDown:Boolean = false;
@@ -135,6 +135,14 @@
 				var myTimer:Timer = new Timer(50);
 				myTimer.addEventListener('timer', updateTime);
 				myTimer.start();
+            }
+            
+            private function hoverCheck(e:Event):void{
+            	if(this.mouseX > 0 && this.mouseY > 0 && this.mouseX < 128 && this.mouseY < 128){
+            		trace('huffa: '+this.mouseX+' '+this.mouseY);
+            	}else{
+            	trace('gone: '+this.mouseX+' '+this.mouseY);
+            	}
             }
 
             private function configureContextMenu():void{            			
@@ -404,7 +412,7 @@
             	alphaDiv.alpha = 1;
             }
             
-            private function onAlphaDivOut(e:MouseEvent):void{
+            private function onAlphaDivOut(e:Event):void{
             	//tween out
             	TweenLite.to(nfoDisplay, 2, {autoAlpha:0, ease:Expo.easeOut});
             	TweenLite.to(timeDisplay, 2, {autoAlpha:0, ease:Expo.easeOut});
