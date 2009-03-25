@@ -454,6 +454,7 @@
 				randomCover.refreshWith(config.currentRandomSong);				
 			}
 			
+			
 
         ]]>
     </mx:Script>
