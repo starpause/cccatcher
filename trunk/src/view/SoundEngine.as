@@ -54,6 +54,7 @@ package view{
 					//we are seeking forward through the nextStack after having seeked backward
 					currentRandomSong = nextStack.pop();
 					config.currentRandomSong=currentRandomSong;
+					songPosition=0;
 					config.savedPosition=0;
 				} else {
 					//we are free to random
@@ -77,6 +78,8 @@ package view{
 				currentRandomSong=backStack.pop();
 				config.currentRandomSong=currentRandomSong;
 			}else{
+				songPosition=0;
+				config.savedPosition=0;
 				trace('backStack empty');
 			}
 			loadSound();
