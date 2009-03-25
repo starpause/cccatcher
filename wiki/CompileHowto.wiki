@@ -1,0 +1,7 @@
+#summary One-sentence summary of this page.
+
+  * [http://subversion.tigris.org/ SVN] checkout the [http://code.google.com/p/cccatcher/source/checkout Source]
+  * in Flex Builder -> File -> Import -> Flex Project -> Import project from: Project folder: _yourCheckoutDir_ -> Finish
+  * Flex Builder -> Run -> Debug -> CCCatcher
+  * Drag some mp3 on it & double click!
+  * If you have commits to make, get in touch: starpause _@_ gmail _._ com
