@@ -34,18 +34,6 @@ package utils{
 			}
 		}
 
-		public static function duplicateAsSprite(original:DisplayObject):Sprite{
-		    var bitmapData:BitmapData = new BitmapData(original.width, original.height, true, 0x000000);
-		    bitmapData.draw( original as IBitmapDrawable );
-		
-		    var bitmap:Bitmap = new Bitmap( bitmapData );
-		
-		    var returnSprite:Sprite = new Sprite();
-		    returnSprite.addChild( bitmap as DisplayObject );
-		
-		    return returnSprite;
-		}
-
 		/**
 		 * duplicateDisplayObject
 		 * creates a duplicate of the DisplayObject passed.
