@@ -26,8 +26,10 @@ package view{
 		private var imageToLoad:String;
 		private var WINDOW_PX:int = 128;
 		private var defaultImage:Bitmap;
-		private var cover:Bitmap=new Bitmap();
-		private var coverOld:Bitmap=new Bitmap();
+		private var image:Bitmap=new Bitmap();
+		private var coverOld:Cover;
+		private var coverNew:Cover;
+		//private var coverOld:Bitmap=new Bitmap();
 		
 		private var imageLoaderNew:Loader = new Loader();
 		private var imageLoaderOld:Loader = new Loader();
@@ -36,7 +38,6 @@ package view{
 		public function CoverDisplay(){
 			defaultImage = new DefaultImage();
 			addChild(defaultImage);
-			//addChild(cover);
 		}
 		
 		public function refreshWith(nativePathToParse:String):void{
@@ -83,7 +84,7 @@ package view{
 			if(possibleImages.length > 0){
 				determineImage();
 			}else{
-				cover.visible = false;
+				image.visible = false;
 				defaultImage.visible = true;
 			}
 		}
@@ -116,50 +117,24 @@ package view{
 		private function onImageComplete(event:Event):void{
 			defaultImage.visible = false;
 			
-			//var copyLast:Bitmap  = new Bitmap(refLast.bitmapData);
+			//copy new 2 old
+			//position old at 0,0
+			//posiiton new at 128,0
+			//posiiton default at 128,0			
+			//put image in new
+			//tween
+						
 			try{
-				removeChild(cover);
-			} catch (e:Error){ trace('no cover to remove'); }
+				removeChild(coverNew);
+			} catch (e:Error){ trace('no image to remove'); }
 			
-			cover = new Bitmap( (event.target.content as Bitmap).bitmapData );
-			resizeCover(cover);
-			panCover(cover);
-			addChild(cover);
+			image = new Bitmap( (event.target.content as Bitmap).bitmapData );
+			coverNew = new Cover(image);
+			addChild(coverNew);
 		}
 		
-		/**
-		 * Make sure the window will be covered 100%  
-		 * by picking the smallest side and scaling it to be the same width/height as the player window.
-		 * @param event Event.COMPLETE from imageLoader:Loader
-		 */
-		public function resizeCover(image:Bitmap):void{
-			var scaleBy:Number;
-			//trace(event.image.content.width+'x'+event.image.content.height);
-			if(image.width < image.height){//if width smaller, scale by width
-				scaleBy = WINDOW_PX / image.width;
-			}else{//if height smaller, scale by height
-				scaleBy = WINDOW_PX / image.height;
-			}
-			image.scaleX = scaleBy;
-			image.scaleY = scaleBy;
-			//trace('scaleBy: '+scaleBy+' achieves '+event.image.content.width+'x'+event.image.content.height);
-
-			//for safety mask it off to not display anything outside that box if the image sent is larger than that space.
-			//like if i do the dropshadow  
-			//event.image.content.mask = this.getChildByName('rect');
-		}
-		/**
-		 * Randomly pan up/down & left/right so the user doesn't always see the same slice of the scaled image.
-		 * Math makes sure the image still covers the entire application window.
-		 * @param event Event.COMPLETE from imageLoader:Loader
-		 */
-		public function panCover(image:Bitmap):void{
-			image.x = Rnd.float(image.width - WINDOW_PX) * -1;
-			image.y = Rnd.float(image.height - WINDOW_PX) * -1;
-			//trace('panCover achieves '+event.target.content.x+'x'+event.target.content.y);
-		}
 		private function onImageError(event:IOErrorEvent):void{
-			cover.visible = false;
+			image.visible = false;
 			defaultImage.visible = true;
 			trace('IOErrorEvent.IO_ERROR: '+imageToLoad+' from loadImage() in RandomCover');
 		}
