@@ -26,15 +26,19 @@ package view{
 		private var imageToLoad:String;
 		private var WINDOW_PX:int = 128;
 		private var defaultImage:Bitmap;
+		private var cover:Bitmap=new Bitmap();
+		private var coverOld:Bitmap=new Bitmap();
+		
 		private var imageLoaderNew:Loader = new Loader();
 		private var imageLoaderOld:Loader = new Loader();
 		private var imageLoader:Loader = new Loader();
 
 		public function RandomCover(){
 			defaultImage = new DefaultImage();
-			addChild(defaultImage); 
+			addChild(defaultImage);
+			addChild(cover);
 			addChild(imageLoaderOld);
-			addChild(imageLoaderNew);			
+			addChild(imageLoaderNew);
 		}
 		
 		public function refreshWith(nativePathToParse:String):void{
@@ -124,8 +128,11 @@ package view{
 			defaultImage.visible = false;
 			resizeCover(event);
 			panCover(event);
+			//var copyLast:Bitmap  = new Bitmap(refLast.bitmapData);
+			cover = new Bitmap( (event.target.content as Bitmap).bitmapData );
+			addChild(cover);
 			imageLoaderOld.visible=false;
-			imageLoaderNew.visible=true;			
+			imageLoaderNew.visible=false;			
 		}
 		/**
 		 * Make sure the window will be covered 100%  

@@ -68,6 +68,7 @@ package model{
 			if(prefsXML.windowState.@x>=0){windowX=prefsXML.windowState.@x;}else{windowX=0;}
 			if(prefsXML.windowState.@y>=0){windowY=prefsXML.windowState.@y;}else{windowY=0;}
 			currentRandomSong = prefsXML.channelState.@currentTrack;
+			setPlayed(currentRandomSong);
 			savedPosition = prefsXML.channelState.@currentPosition;
 		}
 		
@@ -175,6 +176,7 @@ package model{
 			checkAllTracksPlayed();
 			
 			var rndInt:int = Rnd.integer(0, (prefsXML.trackList.TRACK.length()));
+			trace(rndInt);
 			var nextRandomSong:String = prefsXML.trackList.children()[rndInt].@uri;
 			
 			//if the nextRandomSong is bad for any reason, make a recursive call:
@@ -203,13 +205,17 @@ package model{
 		 */
 		private function checkAllTracksPlayed():void{
 			// First obtain an XMLList object representing all <EMPLOYEE> elements
-			var allEmployees:XMLList = prefsXML.trackList.*;
+			var allTracks:XMLList = prefsXML.trackList.*;
 			// Now filter the list of <EMPLOYEE> elements
-			var employeesUnderJames:XMLList = allEmployees.(@playCount == '0');
+			var freshTracks:XMLList = allTracks.(@playCount == '0');
 			
-			if(employeesUnderJames.length() == 0){
+			if(freshTracks.length() == 0){
 				resetPlayCounts();
 			}
+		}
+		private function setPlayed(target:String):void{
+			//todo for the case where we have a prefsXML.channelState.@currentTrack that has a playCount of 0
+			//or think of how we got in that state and address it earlier =\
 		}
 		private function resetPlayCounts():void{
 			for each (var child:XML in prefsXML.trackList.*) {
