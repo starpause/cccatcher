@@ -16,7 +16,7 @@ package view{
 	 *
 	 * @author jgray 
 	 */
-	public class RandomCover extends Sprite{
+	public class CoverDisplay extends Sprite{
 		[Embed(source='./assets/cccatcher.jpg')]
 		public static var DefaultImage:Class;
 		
@@ -33,7 +33,7 @@ package view{
 		private var imageLoaderOld:Loader = new Loader();
 		private var imageLoader:Loader = new Loader();
 
-		public function RandomCover(){
+		public function CoverDisplay(){
 			defaultImage = new DefaultImage();
 			addChild(defaultImage);
 			addChild(cover);
