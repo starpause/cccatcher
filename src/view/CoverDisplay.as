@@ -36,9 +36,7 @@ package view{
 		public function CoverDisplay(){
 			defaultImage = new DefaultImage();
 			addChild(defaultImage);
-			addChild(cover);
-			addChild(imageLoaderOld);
-			addChild(imageLoaderNew);
+			//addChild(cover);
 		}
 		
 		public function refreshWith(nativePathToParse:String):void{
@@ -85,10 +83,7 @@ package view{
 			if(possibleImages.length > 0){
 				determineImage();
 			}else{
-				imageLoaderOld.unload();
-				imageLoaderOld.visible=false;
-				imageLoaderNew.unload();
-				imageLoaderNew.visible=false;
+				cover.visible = false;
 				defaultImage.visible = true;
 			}
 		}
@@ -112,60 +107,59 @@ package view{
 			file = file.resolvePath(imageToLoad);
 			var imageRequest:URLRequest = new URLRequest(file.url);
 			
-			//swop
-			imageLoaderOld.unload();
-			imageLoaderOld = imageLoaderNew;
-			imageLoaderOld.visible=true;
-			imageLoaderNew.visible=false;
-			
 			//fill new
-			imageLoaderNew.unload();			
-			imageLoaderNew.contentLoaderInfo.addEventListener(IOErrorEvent.IO_ERROR, onImageError);
-			imageLoaderNew.contentLoaderInfo.addEventListener(Event.COMPLETE, onImageComplete);
-			imageLoaderNew.load(imageRequest);
+			imageLoader.unload();			
+			imageLoader.contentLoaderInfo.addEventListener(IOErrorEvent.IO_ERROR, onImageError);
+			imageLoader.contentLoaderInfo.addEventListener(Event.COMPLETE, onImageComplete);
+			imageLoader.load(imageRequest);
 		}
 		private function onImageComplete(event:Event):void{
 			defaultImage.visible = false;
-			resizeCover(event);
-			panCover(event);
+			
 			//var copyLast:Bitmap  = new Bitmap(refLast.bitmapData);
+			try{
+				removeChild(cover);
+			} catch (e:Error){ trace('no cover to remove'); }
+			
 			cover = new Bitmap( (event.target.content as Bitmap).bitmapData );
+			resizeCover(cover);
+			panCover(cover);
 			addChild(cover);
-			imageLoaderOld.visible=false;
-			imageLoaderNew.visible=false;			
 		}
+		
 		/**
 		 * Make sure the window will be covered 100%  
 		 * by picking the smallest side and scaling it to be the same width/height as the player window.
 		 * @param event Event.COMPLETE from imageLoader:Loader
 		 */
-		public function resizeCover(event:Event):void{
+		public function resizeCover(image:Bitmap):void{
 			var scaleBy:Number;
-			//trace(event.target.content.width+'x'+event.target.content.height);
-			if(event.target.content.width < event.target.content.height){//if width smaller, scale by width
-				scaleBy = WINDOW_PX / event.target.content.width;
+			//trace(event.image.content.width+'x'+event.image.content.height);
+			if(image.width < image.height){//if width smaller, scale by width
+				scaleBy = WINDOW_PX / image.width;
 			}else{//if height smaller, scale by height
-				scaleBy = WINDOW_PX / event.target.content.height;
+				scaleBy = WINDOW_PX / image.height;
 			}
-			event.target.content.scaleX = scaleBy;
-			event.target.content.scaleY = scaleBy;
-			//trace('scaleBy: '+scaleBy+' achieves '+event.target.content.width+'x'+event.target.content.height);
+			image.scaleX = scaleBy;
+			image.scaleY = scaleBy;
+			//trace('scaleBy: '+scaleBy+' achieves '+event.image.content.width+'x'+event.image.content.height);
 
 			//for safety mask it off to not display anything outside that box if the image sent is larger than that space.
 			//like if i do the dropshadow  
-			//event.target.content.mask = this.getChildByName('rect');
+			//event.image.content.mask = this.getChildByName('rect');
 		}
 		/**
 		 * Randomly pan up/down & left/right so the user doesn't always see the same slice of the scaled image.
 		 * Math makes sure the image still covers the entire application window.
 		 * @param event Event.COMPLETE from imageLoader:Loader
 		 */
-		public function panCover(event:Event):void{
-			event.target.content.x = Rnd.float(event.target.content.width - WINDOW_PX) * -1;
-			event.target.content.y = Rnd.float(event.target.content.height - WINDOW_PX) * -1;
+		public function panCover(image:Bitmap):void{
+			image.x = Rnd.float(image.width - WINDOW_PX) * -1;
+			image.y = Rnd.float(image.height - WINDOW_PX) * -1;
 			//trace('panCover achieves '+event.target.content.x+'x'+event.target.content.y);
 		}
 		private function onImageError(event:IOErrorEvent):void{
+			cover.visible = false;
 			defaultImage.visible = true;
 			trace('IOErrorEvent.IO_ERROR: '+imageToLoad+' from loadImage() in RandomCover');
 		}
