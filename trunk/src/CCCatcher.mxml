@@ -36,7 +36,7 @@
 			import flash.desktop.Clipboard;
 			
 			import model.Config;
-			import view.RandomCover;
+			import view.CoverDisplay;
 			import utils.FileSystem;
             import flash.filesystem.File;
 			import utils.Utils;
@@ -51,7 +51,7 @@
 
 			private var cm:ContextMenu = new ContextMenu();
 			
-			private var randomCover:RandomCover = new RandomCover();			
+			private var randomCover:CoverDisplay = new CoverDisplay();			
 			private var soundEngine:SoundEngine = new SoundEngine();
 			private var timeDisplay:Time = new Time();
 			private var nfoDisplay:NfoDisplay = new NfoDisplay();
