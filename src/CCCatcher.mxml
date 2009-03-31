@@ -37,6 +37,7 @@
 			
 			import model.Config;
 			import view.CoverDisplay;
+			import view.Transport;
 			import utils.FileSystem;
             import flash.filesystem.File;
 			import utils.Utils;
@@ -46,7 +47,7 @@
 			
 			[Embed(source='./assets/_uni05_53.ttf', fontName='_uni05')]
 			public static var _uni05:Class;
-			
+									
             static private var config:Config = Config.instance;
 
 			private var cm:ContextMenu = new ContextMenu();
@@ -56,6 +57,7 @@
 			private var timeDisplay:Time = new Time();
 			private var nfoDisplay:NfoDisplay = new NfoDisplay();
 			private var hitBox:HitBox = new HitBox();
+			private var transport:Transport = new Transport();
 			
 			//double click emulation
 			private var leftClicks:int = 0;
@@ -119,13 +121,20 @@
 				timeDisplay.buttonMode = true;
 				timeDisplay.visible = false;
 				//timeDisplay.useHandCursor = true;//auto display fwd/bak hint text   << >>
-				timeDisplay.x = int(stage.width/2 - timeDisplay.width/2);
-				timeDisplay.y = int(stage.height - 15);
+				//timeDisplay.x = int(stage.width/2 - timeDisplay.width/2);
+				//timeDisplay.y = int(stage.height - 15);
 				timeDisplay.addEventListener("LEFT_SINGLE_CLICK", clickTime);
 				timeDisplay.addEventListener("LEFT_SHIFT_CLICK", onPauseSelect);
 				timeDisplay.addEventListener("RIGHT_SHIFT_CLICK", onPauseSelect);
 				timeDisplay.addEventListener("RIGHT_SINGLE_CLICK", rightClickTime);
 				alphaDiv.addChild(timeDisplay);
+				
+				//play+pause+quit
+				transport.visible=false;
+				transport.addEventListener("PAUSE", onPauseSelect);
+				transport.addEventListener("PLAY", onPauseSelect);
+				transport.addEventListener("QUIT", onQuitSelect);
+				alphaDiv.addChild(transport);
 				
 				//clean dead items out of the TrackList
 				configureContextMenu();
@@ -400,6 +409,10 @@
 			}
 			
             private function onAlphaDivOver(e:MouseEvent):void{
+            	TweenLite.killTweensOf(transport);
+            	transport.visible=true;
+            	transport.alpha=1
+
             	TweenLite.killTweensOf(nfoDisplay);
             	nfoDisplay.visible=true;
             	nfoDisplay.alpha=1
@@ -414,6 +427,7 @@
             
             private function onAlphaDivOut(e:Event):void{
             	//tween out
+            	TweenLite.to(transport, 2, {autoAlpha:0, ease:Expo.easeOut});
             	TweenLite.to(nfoDisplay, 2, {autoAlpha:0, ease:Expo.easeOut});
             	TweenLite.to(timeDisplay, 2, {autoAlpha:0, ease:Expo.easeOut});
             	TweenLite.to(alphaDiv, 5, {alpha:alphaValue, ease:Expo.easeOut});
@@ -421,10 +435,10 @@
             
 			
 //- MENU ITEM HANDLERS -//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//-
-			private function onStarSelect(e:ContextMenuEvent=null):void{
+			private function onStarSelect(e:Event=null):void{
 				tagCurrentTrack();
 			}
-			private function onDeleteSelect(e:ContextMenuEvent=null):void{
+			private function onDeleteSelect(e:Event=null):void{
 				deleteCurrentTrack();
 			}
 			private function onPauseSelect(e:Event=null):void{
@@ -432,18 +446,18 @@
 				this.mouseRightDown=false;
 				soundEngine.togglePlay();
 			}
-			private function onSkipSelect(e:ContextMenuEvent=null):void{
+			private function onSkipSelect(e:Event=null):void{
 				soundEngine.playNext();
 			}
-			private function onQuitSelect(e:ContextMenuEvent=null):void{
+			private function onQuitSelect(e:Event=null):void{
 				windowClosingHandler();
 				//NativeApplication.nativeApplication.exit();
 				nativeApplication.exit();
 			}
-			private function onClearSelect(e:ContextMenuEvent=null):void{
+			private function onClearSelect(e:Event=null):void{
 				config.removeAllTracks();
 			}
-			private function onConfigSelect(e:ContextMenuEvent=null):void{
+			private function onConfigSelect(e:Event=null):void{
 				//todo =(
 			}
 			private function onPreviousSelect(e:Event=null):void{
