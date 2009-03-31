@@ -173,7 +173,7 @@
 				var clear:ContextMenuItem = new ContextMenuItem("Flush");
 				clear.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, onClearSelect);
 				cm.customItems.push(clear);
-
+				
 				//stars only as a submenu, flush could go in this submenu too
 				/*
 				var subMenu:NativeMenu = new NativeMenu();
@@ -181,12 +181,12 @@
 				starsOnly.addEventListener(Event.SELECT, onStarsOnly);
 				subMenu.addItem(starsOnly);
 				cm.addSubmenu(subMenu,"Playlist");
-				*/
+				
 				
 				var quit:ContextMenuItem = new ContextMenuItem("Quit");
 				quit.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, onQuitSelect);
 				cm.customItems.push(quit);
-
+				*/
             }
                         
             private function loadWindowPosition():void{
