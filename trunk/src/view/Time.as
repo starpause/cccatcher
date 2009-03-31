@@ -12,7 +12,6 @@ package view{
 		
 //- PUBLIC -//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//-
 		public function Time(){
-			draw();
 			addEventListener( Event.ADDED, onAdded );
 		}
 		
@@ -40,9 +39,18 @@ package view{
 			//_elapsedField.wordWrap = true;
 			_elapsedField.text = '77:77/77:77';//rollin/*53v7nZ*/
 			addChild(_elapsedField);			
+
+			this.x = int(stage.width/2 - this.width/2)+1;
+			this.y = int(stage.height - 17);
+		}
+		
+		private function position():void{
+			
 		}
 				
 		private function onAdded(e:Event):void{
+			draw();
+
 			//add listeners once the stage is accessible
 			this.addEventListener(MouseEvent.CLICK, onLeftClick);
 			this.addEventListener(MouseEvent.RIGHT_CLICK, onRightClick);
