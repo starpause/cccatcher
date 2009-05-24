@@ -8,9 +8,9 @@ package view{
 		
 		public function Cover(image:Bitmap=null){
 			if(image==null){
-			
+				//insert default image here instead of in CoverDisplay?
 			}
-			//event.image.content.mask = this.getChildByName('rect');
+						
 			resizeCover(image);
 			panCover(image);
 			maskThe(image);
