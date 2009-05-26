@@ -112,14 +112,15 @@
 				
 				//nfo display
 				nfoDisplay.buttonMode = true;
-				nfoDisplay.useHandCursor = false;
+				nfoDisplay.useHandCursor = true;
 				nfoDisplay.visible = false;
 				nfoDisplay.contextMenu = cm;
 				alphaDiv.addChild(nfoDisplay);
 
 
-				timeDisplay.buttonMode = true;
-				timeDisplay.visible = false;
+				timeDisplay.buttonMode=true;
+				timeDisplay.useHandCursor=true;
+				timeDisplay.visible=false;
 				//timeDisplay.useHandCursor = true;//auto display fwd/bak hint text   << >>
 				//timeDisplay.x = int(stage.width/2 - timeDisplay.width/2);
 				//timeDisplay.y = int(stage.height - 15);
@@ -272,7 +273,7 @@
 				//config.removeTrack(currentRandomSong);//not 100% necessary since config.randomPlay() will delete any nulls it finds in the tracklist
 			}
 
-//- UI HANDLERS -//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//-
+//- UI HANDLERS -//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//-            
 			//drag & drop handlers
 			public function onDragIn(event:NativeDragEvent):void{
 			    NativeDragManager.dropAction = NativeDragActions.MOVE;
@@ -329,6 +330,7 @@
 			}
 
 			public function mouseDrag(e:Event):void {
+            	Mouse.cursor = MouseCursor.HAND;
 				stage.nativeWindow.startMove();
 			}
 			
@@ -352,6 +354,7 @@
 			}
 			private function hitBoxLeftUp(e:MouseEvent):void{
 				//trace('L up');
+            	Mouse.cursor = MouseCursor.AUTO;				
 				waitToDrag.stop();
 				mouseLeftDown=false;
 			}
