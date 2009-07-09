@@ -48,7 +48,7 @@ package main {
 		private var leftClicks:int = 0;
 		private var rightClicks:int = 0;
 		private var clickWindow:Timer = new Timer(250,1);
-		private var waitToDrag:Timer = new Timer(150,1);
+		private var waitToDrag:Timer = new Timer(40,1);
 		private var shiftKeyDown:Boolean = false;
 		private var mouseLeftDown:Boolean = false;
 		private var mouseRightDown:Boolean = false;
@@ -320,7 +320,7 @@ package main {
 
 		public function mouseDrag(e:Event=null):void {
 			trace('mouseDrag()');
-        	Mouse.cursor = MouseCursor.HAND;
+        	//Mouse.cursor = MouseCursor.HAND;
 			stage.nativeWindow.startMove();
 		}
 		
@@ -345,7 +345,7 @@ package main {
 		}
 		private function hitBoxLeftUp(e:MouseEvent):void{
 			trace('hitBoxLeftUp()');
-        	Mouse.cursor = MouseCursor.AUTO;				
+        	//Mouse.cursor = MouseCursor.AUTO;				
 			waitToDrag.stop();
 			mouseLeftDown=false;
 		}
