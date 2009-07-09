@@ -48,16 +48,16 @@
 		<transparent>true</transparent>
 
 		<!-- Whether the window is initially visible. Optional. Default false. -->
-		<!-- <visible></visible> -->
+		<!-- <visible>false</visible> -->
 
 		<!-- Whether the user can minimize the window. Optional. Default true. -->
-		<!-- <minimizable></minimizable> -->
+		<!-- <minimizable>true</minimizable> -->
 
 		<!-- Whether the user can maximize the window. Optional. Default true. -->
-		<!-- <maximizable></maximizable> -->
+		<!-- <maximizable>false</maximizable> -->
 
 		<!-- Whether the user can resize the window. Optional. Default true. -->
-		<!-- <resizable></resizable> -->
+		<!-- <resizable>false</resizable> -->
 
 		<!-- The window's initial width. Optional. -->
 		<width>128</width>
