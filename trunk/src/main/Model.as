@@ -1,10 +1,10 @@
-package model{
+package main{
 	import flash.filesystem.*;
 	
 	import utils.FileSystem;
 	import utils.Rnd;
 
-	public class Config{
+	public class Model{
 		public var prefsFile:File; // The preferences File
 		private var prefsXML:XML; // The XML data
 		public var stream:FileStream; // The FileStream object used to read and write prefsFile data.
@@ -17,18 +17,18 @@ package model{
 		public var savedPosition:Number = 0;
 		
 //- SINGLETON ENFORCING --//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//
-		private static const _instance:Config = new Config(SingletonLock); // Storage for the singleton instance.
+		private static const _instance:Model = new Model(SingletonLock); // Storage for the singleton instance.
 
 		/** Provides singleton access to the instance. */
-  		public static function get instance():Config{
+  		public static function get instance():Model{
 			return _instance;
 		}
 		
 		/** @param lock The Singleton lock class to pevent outside instantiation. */
-		public function Config(lock:Class){
+		public function Model(lock:Class){
 			// Verify that the lock is the correct class reference.
 			if ( lock != SingletonLock ){
-				throw new Error( "Invalid Singleton access, use Config.instance" );
+				throw new Error( "Invalid Singleton access, use Model.instance" );
 			}
 			//normal construction continues here
 			init();
@@ -233,7 +233,7 @@ package model{
 		
 		
 
-	}//Config class
+	}//Model class
 }//package
 
 /**

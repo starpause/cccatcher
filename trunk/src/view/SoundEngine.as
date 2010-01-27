@@ -7,10 +7,10 @@ package view{
 	import flash.media.SoundChannel;
 	import flash.net.URLRequest;
 	
-	import model.Config;
+	import main.Model;
 	
 	public class SoundEngine extends EventDispatcher{
-		static private var config:Config = Config.instance;
+		static private var config:Model = Model.instance;
 		private var TRANSPORT_MS:int = 7000;
 		public var _songCurrent:Sound = new Sound();
 		public var _channel:SoundChannel = new SoundChannel();
