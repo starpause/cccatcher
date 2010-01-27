@@ -12,7 +12,7 @@ package main {
 	import gs.TweenLite;
 	import gs.easing.*;
 	
-	import model.Config;
+	import main.Model;
 	
 	import mx.core.WindowedApplication;
 	
@@ -33,7 +33,7 @@ package main {
 		[Embed(source='./assets/_uni05_53.ttf', fontName='_uni05')]
 		public static var _uni05:Class;
 								
-        static private var config:Config = Config.instance;
+        static private var config:Model = Model.instance;
 
 		private var cm:ContextMenu = new ContextMenu();
 		
