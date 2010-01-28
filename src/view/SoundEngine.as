@@ -1,16 +1,20 @@
 package view{
+	//adobe
 	import flash.events.Event;
-	import flash.events.EventDispatcher;
+	//import flash.events.EventDispatcher;
 	import flash.events.IOErrorEvent;
 	import flash.filesystem.File;
 	import flash.media.Sound;
 	import flash.media.SoundChannel;
 	import flash.net.URLRequest;
 	
+	import main.Glob;
+	import main.GlobEvent;
 	import main.Model;
 	
-	public class SoundEngine extends EventDispatcher{
+	public class SoundEngine extends Object{
 		static private var config:Model = Model.instance;
+		static private var glob:Glob = Glob.instance;
 		private var TRANSPORT_MS:int = 7000;
 		public var _songCurrent:Sound = new Sound();
 		public var _channel:SoundChannel = new SoundChannel();
@@ -19,12 +23,11 @@ package view{
 		
 		public var songPaused:Boolean = false;
 		public var songPosition:Number = 0;
-
+		
 		private var previousRandomSong:String;
 		private var rewinding:Boolean=false;
 		private var backStack:Array = new Array;
 		private var nextStack:Array = new Array;
-
 		
 		public function SoundEngine(){
 		}
@@ -127,7 +130,7 @@ package view{
 			_channel.addEventListener(Event.SOUND_COMPLETE, playNext);
 			songPaused = false;
 			//displatch event 
-			dispatchEvent(new Event("SOUND_LOADED") );
+			glob.dispatchEvent(new GlobEvent(GlobEvent.SOUND_LOADED));
 		}
 		
 		private function onSoundError(event:IOErrorEvent):void{
@@ -149,7 +152,7 @@ package view{
 			}else{
 				playNext();
 			}
-			dispatchEvent(new Event("UPDATE_TIME") );
+			glob.dispatchEvent(new GlobEvent(GlobEvent.UPDATE_TIME));
 		}
 		
 		public function rewind():void{
@@ -164,7 +167,7 @@ package view{
 				_channel.addEventListener(Event.SOUND_COMPLETE, playNext);
 			}
 			songPaused = false;
-			dispatchEvent(new Event("UPDATE_TIME") );
+			glob.dispatchEvent(new GlobEvent(GlobEvent.UPDATE_TIME));
 		}
 		
 	}//class

@@ -1,4 +1,5 @@
 package main {
+	//adobe
 	import flash.desktop.NativeDragManager;
 	import flash.display.*;
 	import flash.events.*;
@@ -8,17 +9,16 @@ package main {
 	import flash.ui.ContextMenu;
 	import flash.ui.*;
 	import flash.desktop.*;
-	
+	import mx.core.WindowedApplication;
+	//third party
 	import gs.TweenLite;
 	import gs.easing.*;
-	
+	//ours	
 	import main.Model;
-	
-	import mx.core.WindowedApplication;
-	
+	import main.Glob;
+	import main.GlobEvent;
 	import utils.FileSystem;
-	import utils.Utils;
-	
+	import utils.Utils;	
 	import view.CoverDisplay;
 	import view.HitBox;
 	import view.NfoDisplay;
@@ -34,7 +34,8 @@ package main {
 		public static var _uni05:Class;
 								
         static private var config:Model = Model.instance;
-
+		static private var glob:Glob = Glob.instance;
+		
 		private var cm:ContextMenu = new ContextMenu();
 		
 		private var randomCover:CoverDisplay = new CoverDisplay();			
@@ -76,11 +77,10 @@ package main {
 
 			stage.addChild(alphaDiv);
 			
-			//
-			soundEngine.addEventListener("SOUND_LOADED", onSoundLoaded);
-			soundEngine.addEventListener("UPDATE_TIME", updateTime);
-			
-			
+			//controller business
+			glob.addEventListener(GlobEvent.SOUND_LOADED, onSoundLoaded);
+			glob.addEventListener(GlobEvent.UPDATE_TIME, updateTime);
+									
 			//randomCover.alpha = alphaValue;
 			alphaDiv.addChild(randomCover);
 							
@@ -138,9 +138,9 @@ package main {
         
         private function hoverCheck(e:Event):void{
         	if(this.mouseX > 0 && this.mouseY > 0 && this.mouseX < 128 && this.mouseY < 128){
-        		trace('huffa: '+this.mouseX+' '+this.mouseY);
+        		//trace('huffa: '+this.mouseX+' '+this.mouseY);
         	}else{
-        	trace('gone: '+this.mouseX+' '+this.mouseY);
+        	//trace('gone: '+this.mouseX+' '+this.mouseY);
         	}
         }
 
@@ -178,7 +178,7 @@ package main {
 			cm.customItems.push(quit);
 			*/
         }
-                    
+        
         private function loadWindowPosition():void{
 			stage.nativeWindow.x = config.windowX;
 			stage.nativeWindow.y = config.windowY;
@@ -187,7 +187,7 @@ package main {
         	stage.nativeWindow.visible = true;
         	erectPlayer();
         }
-
+		
         private function erectPlayer():void{
 			var storedRandomSong:String = config.currentRandomSong;
 			//special case: first time app is run there's no song to play =(
@@ -197,24 +197,14 @@ package main {
         	if(FileSystem.nativePathExists(storedRandomSong) == true){
         		soundEngine.forceTrack = storedRandomSong;
         		soundEngine.playNext();
-        	}else{//we randomly play a song like usual
-        		soundEngine.playNext();
-        	}
-        }
+			}else{//we randomly play a song like usual
+				soundEngine.playNext();
+			}
+		}
 
 
 //- UTIL -//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//-
-        private function removeDuplicates(tl:Array):Array{
-		    var z:Array = tl.filter(function (a:*,b:int,c:Array):Boolean { return ((z ? z : z = new Array()).indexOf(a) >= 0 ? false : (z.push(a) >= 0)); }, this);
-			return z;             		
-        }
-        
-		/**
-		 * This function takes an array of files and folders and retuns an array of just files
-		 * This function also removes hidden files
-		 * 
-		 * @param files
-		*/
+		/** Takes an array of files and folders & retuns an array of just files, excluding hidden files */
 		private function cleanFileArray(files:Array):Array{
 			var arrayToReturn:Array = new Array();
 			
@@ -247,9 +237,7 @@ package main {
 			}
 		}
 		
-		/**
-		* randomPlay() the next track, delete the file from the filesystem.
-		*/
+		/** randomPlay() the next track, delete the file from the filesystem. */
 		private function deleteCurrentTrack():void{
 			var nativePathToNuke:String = config.currentRandomSong;
 			soundEngine.playNext();
@@ -257,8 +245,8 @@ package main {
 			var tempFile:File = new File(nativePathToNuke);
 			//tempFile = tempFile.resolvePath(nativePathToNuke);
 			tempFile.moveToTrashAsync();
-
-		    //FileSystem.remove(nativePathToNuke);
+			
+			//FileSystem.remove(nativePathToNuke);
 			//config.removeTrack(currentRandomSong);//not 100% necessary since config.randomPlay() will delete any nulls it finds in the tracklist
 		}
 
@@ -294,7 +282,7 @@ package main {
 						//trace(file.name+" not a recognised file format"); 
 				}
 			}
-			trace('onDrop() added '+addedCount+', skipped '+skipCount);
+			//trace('onDrop() added '+addedCount+', skipped '+skipCount);
 		}
 		public function onDragExit(event:NativeDragEvent):void{
 		    //trace("Drag exit event.");
@@ -398,7 +386,7 @@ package main {
 				//move current image to trash
 			}
 			else{
-				onPreviousSelect();
+				soundEngine.playPrevious();
 			}
 		}
 		
@@ -440,9 +428,6 @@ package main {
 			this.mouseRightDown=false;
 			soundEngine.togglePlay();
 		}
-		private function onSkipSelect(e:Event=null):void{
-			soundEngine.playNext();
-		}
 		private function onQuitSelect(e:Event=null):void{
 			windowClosingHandler();
 			//NativeApplication.nativeApplication.exit();
@@ -454,10 +439,7 @@ package main {
 		private function onConfigSelect(e:Event=null):void{
 			//todo =(
 		}
-		private function onPreviousSelect(e:Event=null):void{
-			soundEngine.playPrevious();
-		}
-
+		
 //- SOUND ENGINE HANDLERS -//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//-
 		private function updateTime(e:Event=null):void{
 			var elapsedSeconds:String = Utils.formatTime(soundEngine._channel.position/1000);
