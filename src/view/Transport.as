@@ -19,7 +19,7 @@ package view{
 		public static var PauseOver:Class;
 		private var pauseOver:Bitmap = new PauseOver();
 		private var pauseButton:Sprite = new Sprite();
-
+		
 		[Embed(source='./assets/quit.png')]
 		public static var QuitIcon:Class;
 		private var quitIcon:Bitmap = new QuitIcon();
@@ -27,7 +27,15 @@ package view{
 		public static var QuitOver:Class;
 		private var quitOver:Bitmap = new QuitOver();
 		private var quitButton:Sprite = new Sprite();
-
+		
+		[Embed(source='./assets/trash.png')]
+		public static var TrashIcon:Class;
+		private var trashIcon:Bitmap = new TrashIcon();
+		[Embed(source='./assets/trash-over.png')]
+		public static var TrashOver:Class;
+		private var trashOver:Bitmap = new TrashOver();
+		private var trashButton:Sprite = new Sprite();
+		
 		public function Transport(){
 			addEventListener( Event.ADDED, init );
 		}
