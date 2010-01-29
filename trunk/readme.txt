@@ -6,7 +6,7 @@ SOLUTION: A shuffle-ish player that randomly exposes me to the latest treats, wi
 
 CURRENT FEATURES:
 * 128x128 always-on-top, semi-transparent window
-* add mp3s to play by dragging them onto the window
+* add mp3s to play by dragging them or folders onto the window
 * double click to shuffle
 * right click for menu: Star (put -dinoaids- in the file name), Delete (remove file), Pause, Quit
 * window displays a random image from the folder that holds whatever mp3 is playing
@@ -14,9 +14,5 @@ CURRENT FEATURES:
 * when you quit the current song and position is stored, continues playback from that point on next boot.
 
 PLANNED FEATURES:
-* on mouseover display current time and allow seeking forward/back
-* on-mousover: display current track title/artist/album
-* update window title with current track title/artist/album
 * mp3gain files before playing them
-* catch rss feeds of tracks from netlabels so i don't have to download this sh*t by hand!
-
+* play an mp3 instantly by dragging it alone onto the window
