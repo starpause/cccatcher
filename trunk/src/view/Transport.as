@@ -2,7 +2,12 @@ package view{
 	import flash.display.*;
 	import flash.events.*;
 	
+	import main.Glob;
+	import main.GlobEvent;
+	
 	public class Transport extends Sprite{
+		static private var glob:Glob = Glob.instance;
+		
 		//these guys are 18x18 ... is 16x16 cooler like favicons?!
 		[Embed(source='./assets/play.png')]
 		public static var PlayIcon:Class;
@@ -44,11 +49,21 @@ package view{
 		private var starOver:Bitmap = new StarOver();
 		private var starButton:Sprite = new Sprite();
 
+		[Embed(source='./assets/starFull.png')]
+		public static var StarFullIcon:Class;
+		private var starFullIcon:Bitmap = new StarFullIcon();
+		[Embed(source='./assets/starFull-over.png')]
+		public static var StarFullOver:Class;
+		private var starFullOver:Bitmap = new StarFullOver();
+		private var starFullButton:Sprite = new Sprite();
+
 		public function Transport(){
 			addEventListener( Event.ADDED, init );
 		}
 		
 		private function init(e:Event):void{
+			glob.addEventListener(GlobEvent.SET_STAR_FULL, setStar);
+
 			//pauseButton
 			pauseButton.addChild(pauseIcon);
 			pauseButton.addChild(pauseOver);
@@ -112,6 +127,23 @@ package view{
 			//trashButton.x=12+quitButton.x+quitButton.width;
 			addChild(trashButton);
 
+			//starFullButton
+			starFullButton.addChild(starFullIcon);
+			starFullButton.addChild(starFullOver);
+			starFullOver.alpha=0;
+			starFullOver.name='over';
+			starFullButton.name='starButton';
+			starFullButton.buttonMode=true;
+			starFullButton.mouseChildren=false;
+			starFullButton.addEventListener(MouseEvent.MOUSE_DOWN, onStarFullDown);
+			starFullButton.addEventListener(MouseEvent.MOUSE_OVER, onRollOver);
+			starFullButton.addEventListener(MouseEvent.MOUSE_OUT, onRollOut);
+			starFullButton.y=playButton.y-16-8;
+			starFullButton.x=playButton.x;
+			//starButton.y=quitButton.y-8;
+			//starButton.x=12+quitButton.x+quitButton.width;
+			addChild(starFullButton);
+			
 			//starButton
 			starButton.addChild(starIcon);
 			starButton.addChild(starOver);
@@ -128,7 +160,6 @@ package view{
 			//starButton.y=quitButton.y-8;
 			//starButton.x=12+quitButton.x+quitButton.width;
 			addChild(starButton);
-
 		}
 		
 		private function onRollOver(e:Event):void{
@@ -160,8 +191,26 @@ package view{
 		}
 
 		private function onStarDown(e:Event):void{
-			dispatchEvent(new Event("STAR") );			
+			starButton.visible=false;
+			starFullButton.visible=true;
+			dispatchEvent(new Event("STAR_ON") );			
 		}
 
+		private function onStarFullDown(e:Event):void{
+			starButton.visible=true;
+			starFullButton.visible=false;
+			dispatchEvent(new Event("STAR_OFF") );			
+		}
+		
+		private function setStar(e:GlobEvent):void{
+			if(e.params.full==true){
+				starButton.visible=false;
+				starFullButton.visible=true;
+			}else{
+				starButton.visible=true;
+				starFullButton.visible=false;
+			}
+		}
+		
 	}//class
 }//view	
