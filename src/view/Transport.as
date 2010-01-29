@@ -36,6 +36,14 @@ package view{
 		private var trashOver:Bitmap = new TrashOver();
 		private var trashButton:Sprite = new Sprite();
 		
+		[Embed(source='./assets/star.png')]
+		public static var StarIcon:Class;
+		private var starIcon:Bitmap = new StarIcon();
+		[Embed(source='./assets/star-over.png')]
+		public static var StarOver:Class;
+		private var starOver:Bitmap = new StarOver();
+		private var starButton:Sprite = new Sprite();
+
 		public function Transport(){
 			addEventListener( Event.ADDED, init );
 		}
@@ -71,7 +79,7 @@ package view{
 			playButton.y=pauseButton.y;
 			playButton.x=pauseButton.x;
 			addChild(playButton);
-
+			
 			//quitButton
 			quitButton.addChild(quitIcon);
 			quitButton.addChild(quitOver);
@@ -86,6 +94,41 @@ package view{
 			quitButton.y=pauseButton.y;
 			quitButton.x=4;
 			addChild(quitButton);
+
+			//trashButton
+			trashButton.addChild(trashIcon);
+			trashButton.addChild(trashOver);
+			trashOver.alpha=0;
+			trashOver.name='over';
+			trashButton.name='trashButton';
+			trashButton.buttonMode=true;
+			trashButton.mouseChildren=false;
+			trashButton.addEventListener(MouseEvent.MOUSE_DOWN, onTrashDown);
+			trashButton.addEventListener(MouseEvent.MOUSE_OVER, onRollOver);
+			trashButton.addEventListener(MouseEvent.MOUSE_OUT, onRollOut);
+			trashButton.y=quitButton.y-16-8;
+			trashButton.x=quitButton.x;
+			//trashButton.y=quitButton.y-8;
+			//trashButton.x=12+quitButton.x+quitButton.width;
+			addChild(trashButton);
+
+			//starButton
+			starButton.addChild(starIcon);
+			starButton.addChild(starOver);
+			starOver.alpha=0;
+			starOver.name='over';
+			starButton.name='starButton';
+			starButton.buttonMode=true;
+			starButton.mouseChildren=false;
+			starButton.addEventListener(MouseEvent.MOUSE_DOWN, onStarDown);
+			starButton.addEventListener(MouseEvent.MOUSE_OVER, onRollOver);
+			starButton.addEventListener(MouseEvent.MOUSE_OUT, onRollOut);
+			starButton.y=playButton.y-16-8;
+			starButton.x=playButton.x;
+			//starButton.y=quitButton.y-8;
+			//starButton.x=12+quitButton.x+quitButton.width;
+			addChild(starButton);
+
 		}
 		
 		private function onRollOver(e:Event):void{
@@ -110,6 +153,14 @@ package view{
 
 		private function onQuitDown(e:Event):void{
 			dispatchEvent(new Event("QUIT") );			
+		}
+
+		private function onTrashDown(e:Event):void{
+			dispatchEvent(new Event("TRASH") );			
+		}
+
+		private function onStarDown(e:Event):void{
+			dispatchEvent(new Event("STAR") );			
 		}
 
 	}//class

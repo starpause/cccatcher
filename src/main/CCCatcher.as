@@ -124,6 +124,8 @@ package main {
 			transport.addEventListener("PAUSE", onPauseSelect);
 			transport.addEventListener("PLAY", onPauseSelect);
 			transport.addEventListener("QUIT", onQuitSelect);
+			transport.addEventListener("TRASH", onDeleteSelect);
+			transport.addEventListener("STAR", onStarSelect);
 			alphaDiv.addChild(transport);
 			
 			//clean dead items out of the TrackList
@@ -152,13 +154,13 @@ package main {
 			pause.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, onPauseSelect);
 			cm.customItems.push(pause);*/
 
-			var star:ContextMenuItem = new ContextMenuItem("Star");
-			star.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, onStarSelect);
-			cm.customItems.push(star);
+			//var star:ContextMenuItem = new ContextMenuItem("Star");
+			//star.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, onStarSelect);
+			//cm.customItems.push(star);
 			
-			var delTrack:ContextMenuItem = new ContextMenuItem("Delete");
-			delTrack.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, onDeleteSelect);
-			cm.customItems.push(delTrack);
+			//var delTrack:ContextMenuItem = new ContextMenuItem("Delete");
+			//delTrack.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, onDeleteSelect);
+			//cm.customItems.push(delTrack);
 
 			var clear:ContextMenuItem = new ContextMenuItem("Flush");
 			clear.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, onClearSelect);
