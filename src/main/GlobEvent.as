@@ -4,6 +4,7 @@ package main {
 	public class GlobEvent extends Event {
 		public static const SOUND_LOADED:String = "SOUND_LOADED";
 		public static const UPDATE_TIME:String = "UPDATE_TIME";
+		public static const SET_STAR_FULL:String = "SET_STAR_FULL";
 		
 		public var params:Object;
 		private var _type:String;

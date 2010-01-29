@@ -1,24 +1,20 @@
 package main {
 	//adobe
-	import flash.desktop.NativeDragManager;
+	import flash.desktop.*;
 	import flash.display.*;
 	import flash.events.*;
 	import flash.filesystem.File;
-	import flash.ui.Keyboard;
-	import flash.utils.*;
-	import flash.ui.ContextMenu;
 	import flash.ui.*;
-	import flash.desktop.*;
-	import mx.core.WindowedApplication;
-	//third party
+	import flash.utils.*;
+	
 	import gs.TweenLite;
 	import gs.easing.*;
-	//ours	
-	import main.Model;
-	import main.Glob;
-	import main.GlobEvent;
+	
+	import mx.core.WindowedApplication;
+	
 	import utils.FileSystem;
-	import utils.Utils;	
+	import utils.Utils;
+	
 	import view.CoverDisplay;
 	import view.HitBox;
 	import view.NfoDisplay;
@@ -125,7 +121,8 @@ package main {
 			transport.addEventListener("PLAY", onPauseSelect);
 			transport.addEventListener("QUIT", onQuitSelect);
 			transport.addEventListener("TRASH", onDeleteSelect);
-			transport.addEventListener("STAR", onStarSelect);
+			transport.addEventListener("STAR_ON", onStarSelect);
+			transport.addEventListener("STAR_OFF", onStarSelect);
 			alphaDiv.addChild(transport);
 			
 			//clean dead items out of the TrackList
@@ -228,15 +225,17 @@ package main {
 		
 		private function tagCurrentTrack():void{
 			var currentRandomSong:String = config.currentRandomSong;
+			var renameName:String;
 			if( currentRandomSong.indexOf(config.tagCopy) == -1 ){
-				var renameName:String = currentRandomSong.replace('.mp3', config.tagCopy+'.mp3');
-				//trace(renameName);
-				
-				FileSystem.rename(currentRandomSong, renameName);
-				config.renameTrack(currentRandomSong, renameName);
-				config.currentRandomSong = renameName;
-				nfoDisplay.refreshWith(renameName);
+				renameName = currentRandomSong.replace('.mp3', config.tagCopy+'.mp3');
+				//trace(renameName);				
+			}else{
+				renameName = currentRandomSong.replace(config.tagCopy, '');
 			}
+			FileSystem.rename(currentRandomSong, renameName);
+			config.renameTrack(currentRandomSong, renameName);
+			config.currentRandomSong = renameName;
+			nfoDisplay.refreshWith(renameName);
 		}
 		
 		/** randomPlay() the next track, delete the file from the filesystem. */
@@ -451,7 +450,14 @@ package main {
 		}
 		private function onSoundLoaded(e:Event):void{
 			nfoDisplay.refreshWith(config.currentRandomSong);
-			randomCover.refreshWith(config.currentRandomSong);				
+			randomCover.refreshWith(config.currentRandomSong);	
+			if( config.currentRandomSong.indexOf(config.tagCopy) == -1 ){
+				glob.dispatchEvent(new GlobEvent(GlobEvent.SET_STAR_FULL, {full:false}));
+			}else{
+				glob.dispatchEvent(new GlobEvent(GlobEvent.SET_STAR_FULL, {full:true}));
+			}
+			
+						
 		}
 		
 		
