@@ -18,6 +18,7 @@ package main {
 	import view.CoverDisplay;
 	import view.HitBox;
 	import view.NfoDisplay;
+	import view.Progress;
 	import view.SoundEngine;
 	import view.Time;
 	import view.Transport;
@@ -40,6 +41,7 @@ package main {
 		private var nfoDisplay:NfoDisplay = new NfoDisplay();
 		private var hitBox:HitBox = new HitBox();
 		private var transport:Transport = new Transport();
+		private var progress:Progress = new Progress();
 		
 		//double click emulation
 		private var leftClicks:int = 0;
@@ -53,6 +55,7 @@ package main {
 		private var alphaDiv:Sprite = new Sprite();
 		private var alphaValue:Number = .8;
 		
+		private var dropFiles:Array;
 			
 		public function CCCatcher(){
 		}
@@ -76,6 +79,7 @@ package main {
 			//controller business
 			glob.addEventListener(GlobEvent.SOUND_LOADED, onSoundLoaded);
 			glob.addEventListener(GlobEvent.UPDATE_TIME, updateTime);
+			//glob.addEventListener(GlobEvent.FILE_DROP, populatePlaylist);
 									
 			//randomCover.alpha = alphaValue;
 			alphaDiv.addChild(randomCover);
@@ -124,6 +128,10 @@ package main {
 			transport.addEventListener("STAR_ON", onStarSelect);
 			transport.addEventListener("STAR_OFF", onStarSelect);
 			alphaDiv.addChild(transport);
+			
+			//red progress pie
+			//progress.visible=false;
+			alphaDiv.addChild(progress);
 			
 			//clean dead items out of the TrackList
 			configureContextMenu();
@@ -261,14 +269,21 @@ package main {
 		    }
 		}
 		public function onDrop(event:NativeDragEvent):void{
-			var dropFiles:Array = event.clipboard.getData(ClipboardFormats.FILE_LIST_FORMAT) as Array;
+			dropFiles = event.clipboard.getData(ClipboardFormats.FILE_LIST_FORMAT) as Array;
+			dropFiles = cleanFileArray(dropFiles);
+			populatePlaylist();
+		}
+		private function populatePlaylist(e:Event=null):void{
 			var addedCount:Number = 0;
 			var skipCount:Number = 0;
-			dropFiles = cleanFileArray(dropFiles);
+			//add the files to our playlist
+			progress.update(0);
+			progress.visible=true;
 			for each (var file:File in dropFiles){
 				switch (file.extension){
 					case "mp3":
 						if(file.name.indexOf('.')==0){/*it's a hidden file with the . at the start*/
+							skipCount++
 							break;
 						}
 						if(model.trackAlreadyAdded(file.nativePath)==false){
@@ -280,10 +295,13 @@ package main {
 						}
 						break;
 					default:
+						skipCount++
 						//trace(file.name+" not a recognised file format"); 
 				}
+				progress.update((skipCount+addedCount)/(dropFiles.length+1));
 			}
 			//trace('onDrop() added '+addedCount+', skipped '+skipCount);
+			progress.visible=false;
 			
 			//we have never played, go at it! so the user doesn't have to double click when dragging files on for the first time
 			if(soundEngine._channel.position==0){
@@ -294,7 +312,7 @@ package main {
 			if(dropFiles.length==1){
 				soundEngine.forceTrack=file.nativePath;
 				soundEngine.playNext();
-			}
+			}			
 		}
 		public function onDragExit(event:NativeDragEvent):void{
 		    //trace("Drag exit event.");
