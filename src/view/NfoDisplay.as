@@ -30,7 +30,7 @@ package view{
 			setCopy();
 		}
 		
-		private function setCopy(newNfo:String='1. drop some mp3 on this window. \n2. double click to begin the jams.'):void{
+		private function setCopy(newNfo:String='1. drop some mp3 on this window. \n2. double click to shuffle the jams.'):void{
 			_nfoField.text = newNfo;
 			_nfoBg.height = _nfoField.height-4;
 		}
