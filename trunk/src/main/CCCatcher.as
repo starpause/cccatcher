@@ -29,7 +29,7 @@ package main {
 		[Embed(source='./assets/_uni05_53.ttf', fontName='_uni05')]
 		public static var _uni05:Class;
 								
-        static private var config:Model = Model.instance;
+        static private var model:Model = Model.instance;
 		static private var glob:Glob = Glob.instance;
 		
 		private var cm:ContextMenu = new ContextMenu();
@@ -179,8 +179,8 @@ package main {
         }
         
         private function loadWindowPosition():void{
-			stage.nativeWindow.x = config.windowX;
-			stage.nativeWindow.y = config.windowY;
+			stage.nativeWindow.x = model.windowX;
+			stage.nativeWindow.y = model.windowY;
 			//stage.nativeWindow.width = prefsXML.windowState.@width;
 			//stage.nativeWindow.height = prefsXML.windowState.@height;
         	stage.nativeWindow.visible = true;
@@ -188,7 +188,7 @@ package main {
         }
 		
         private function erectPlayer():void{
-			var storedRandomSong:String = config.currentRandomSong;
+			var storedRandomSong:String = model.currentRandomSong;
 			//special case: first time app is run there's no song to play =(
 			if(storedRandomSong == ''){return void;}
 							
@@ -224,23 +224,23 @@ package main {
 		}
 		
 		private function tagCurrentTrack():void{
-			var currentRandomSong:String = config.currentRandomSong;
+			var currentRandomSong:String = model.currentRandomSong;
 			var renameName:String;
-			if( currentRandomSong.indexOf(config.tagCopy) == -1 ){
-				renameName = currentRandomSong.replace('.mp3', config.tagCopy+'.mp3');
+			if( currentRandomSong.indexOf(model.tagCopy) == -1 ){
+				renameName = currentRandomSong.replace('.mp3', model.tagCopy+'.mp3');
 				//trace(renameName);				
 			}else{
-				renameName = currentRandomSong.replace(config.tagCopy, '');
+				renameName = currentRandomSong.replace(model.tagCopy, '');
 			}
 			FileSystem.rename(currentRandomSong, renameName);
-			config.renameTrack(currentRandomSong, renameName);
-			config.currentRandomSong = renameName;
+			model.renameTrack(currentRandomSong, renameName);
+			model.currentRandomSong = renameName;
 			nfoDisplay.refreshWith(renameName);
 		}
 		
 		/** randomPlay() the next track, delete the file from the filesystem. */
 		private function deleteCurrentTrack():void{
-			var nativePathToNuke:String = config.currentRandomSong;
+			var nativePathToNuke:String = model.currentRandomSong;
 			soundEngine.playNext();
 			
 			var tempFile:File = new File(nativePathToNuke);
@@ -248,7 +248,7 @@ package main {
 			tempFile.moveToTrashAsync();
 			
 			//FileSystem.remove(nativePathToNuke);
-			//config.removeTrack(currentRandomSong);//not 100% necessary since config.randomPlay() will delete any nulls it finds in the tracklist
+			//model.removeTrack(currentRandomSong);//not 100% necessary since model.randomPlay() will delete any nulls it finds in the tracklist
 		}
 
 //- UI HANDLERS -//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//-            
@@ -271,9 +271,9 @@ package main {
 						if(file.name.indexOf('.')==0){/*it's a hidden file with the . at the start*/
 							break;
 						}
-						if(config.trackAlreadyAdded(file.nativePath)==false){
+						if(model.trackAlreadyAdded(file.nativePath)==false){
 							//trace('onDrop() add file.nativePath: '+file.nativePath);
-							config.addTrack(file.nativePath);
+							model.addTrack(file.nativePath);
 							addedCount++;
 						}else{
 							skipCount++;
@@ -284,15 +284,26 @@ package main {
 				}
 			}
 			//trace('onDrop() added '+addedCount+', skipped '+skipCount);
+			
+			//we have never played, go at it! so the user doesn't have to double click when dragging files on for the first time
+			if(soundEngine._channel.position==0){
+				soundEngine.playNext();
+			}
+			
+			//user can drop a single mp3 onto CCCATCHER for instant-play
+			if(dropFiles.length==1){
+				soundEngine.forceTrack=file.nativePath;
+				soundEngine.playNext();
+			}
 		}
 		public function onDragExit(event:NativeDragEvent):void{
 		    //trace("Drag exit event.");
 		}
 		
 		private function windowClosingHandler(event:Event=null):void {
-			config.saveWindowState(stage.nativeWindow.x, stage.nativeWindow.y);
-			config.saveChannelState(soundEngine._channel.position);
-			config.writeXMLData();
+			model.saveWindowState(stage.nativeWindow.x, stage.nativeWindow.y);
+			model.saveChannelState(soundEngine._channel.position);
+			model.writeXMLData();
 		}
 
 		//kb handlers			
@@ -376,7 +387,7 @@ package main {
 		}
 		private function leftDoubleClick():void{
 			if(shiftKeyDown == true){
-				randomCover.refreshWith(config.currentRandomSong);
+				randomCover.refreshWith(model.currentRandomSong);
 			}
 			else{
 				soundEngine.playNext();
@@ -435,7 +446,7 @@ package main {
 			nativeApplication.exit();
 		}
 		private function onClearSelect(e:Event=null):void{
-			config.removeAllTracks();
+			model.removeAllTracks();
 		}
 		private function onConfigSelect(e:Event=null):void{
 			//todo =(
@@ -449,9 +460,9 @@ package main {
 			//display
 		}
 		private function onSoundLoaded(e:Event):void{
-			nfoDisplay.refreshWith(config.currentRandomSong);
-			randomCover.refreshWith(config.currentRandomSong);	
-			if( config.currentRandomSong.indexOf(config.tagCopy) == -1 ){
+			nfoDisplay.refreshWith(model.currentRandomSong);
+			randomCover.refreshWith(model.currentRandomSong);	
+			if( model.currentRandomSong.indexOf(model.tagCopy) == -1 ){
 				glob.dispatchEvent(new GlobEvent(GlobEvent.SET_STAR_FULL, {full:false}));
 			}else{
 				glob.dispatchEvent(new GlobEvent(GlobEvent.SET_STAR_FULL, {full:true}));
