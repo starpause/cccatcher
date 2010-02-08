@@ -56,6 +56,10 @@ package main {
 		private var alphaValue:Number = .8;
 		
 		private var dropFiles:Array;
+		private var dropFilesTotal:int;
+		private var populateInProgress:Boolean;
+		private var dropInProgress:Boolean;
+		private var populateTimer:Timer;
 			
 		public function CCCatcher(){
 		}
@@ -264,56 +268,117 @@ package main {
 		public function onDragIn(event:NativeDragEvent):void{
 		    NativeDragManager.dropAction = NativeDragActions.MOVE;
 		    if(event.clipboard.hasFormat(ClipboardFormats.FILE_LIST_FORMAT)){
+		    	//stop the user from dropping if we're still processing the last drop
+		    	if(dropInProgress==true){return;}
 		    	NativeDragManager.acceptDragDrop(hitBox);
-		        //NativeDragManager.acceptDragDrop(this); //'this' is the receiving component
 		    }
 		}
 		public function onDrop(event:NativeDragEvent):void{
 			dropFiles = event.clipboard.getData(ClipboardFormats.FILE_LIST_FORMAT) as Array;
 			dropFiles = cleanFileArray(dropFiles);
-			populatePlaylist();
+			dropFilesTotal = dropFiles.length;
+			
+			if(dropFiles.length==1){
+				//user can drop a single mp3 onto CCCATCHER for instant-play
+				model.addTrack(dropFiles[0].nativePath);
+				soundEngine.forceTrack=dropFiles[0].nativePath;
+				soundEngine.playNext();
+				
+			}else{
+				//we have to populate the playlist with all the files that got dropped
+				startPopulateTimer();
+			}
 		}
-		private function populatePlaylist(e:Event=null):void{
-			var addedCount:Number = 0;
-			var skipCount:Number = 0;
-			//add the files to our playlist
+		
+		private function startPopulateTimer():void{
+			trace('startPopulateTimer()');
+			//so user doesn't do another drop while we are processing the last one
+			dropInProgress=true;
+			//clear display
 			progress.update(0);
-			progress.visible=true;
-			for each (var file:File in dropFiles){
+			progress.visible=true;	
+			//timer biz
+			populateTimer = new Timer(10);		
+			populateTimer.addEventListener(TimerEvent.TIMER, populatePlaylist);
+			populateTimer.start();
+		}
+		
+		private function stopPopulateTimer():void{
+			trace('stopPopulateTimer()');
+			populateTimer.stop();
+			populateTimer = null;
+
+			dropInProgress=false;
+			populateInProgress=false;
+			progress.visible=false;
+						
+			//we have never played, go at it! so the user doesn't have to double click when dragging files on for the first time
+			if(soundEngine._channel.position==0){
+				soundEngine.playNext();
+			}			
+		}
+		
+		/**
+		 * populatePlaylist is an Asynchronous operation so that the display can update while files are being processed
+		 * based on notes at http://www.senocular.com/flash/tutorials/asyncoperations/
+		 */
+		private function populatePlaylist(e:Event=null):void{			
+			if(dropFiles.length <= 0){
+				stopPopulateTimer();
+				return;
+			}
+			
+			//if we're already running a call of populatePlaylist from the timer, escape
+			if(populateInProgress==true){
+				return;
+			}else{
+				populateInProgress=true;
+			}
+			
+			trace('populateInProgress()');
+			//add the files to our playlist
+			var i:int=0;
+			while(dropFiles.length > 0){
+				//take a break from populating every once in a while so the screen can update
+				if(i >= 10){
+					populateInProgress=false;
+					return;
+				}
+				
+				var file:File = dropFiles[0]
+				
 				switch (file.extension){
 					case "mp3":
 						if(file.name.indexOf('.')==0){/*it's a hidden file with the . at the start*/
-							skipCount++
+							//skipCount++
 							break;
 						}
 						if(model.trackAlreadyAdded(file.nativePath)==false){
 							//trace('onDrop() add file.nativePath: '+file.nativePath);
 							model.addTrack(file.nativePath);
-							addedCount++;
+							//addedCount++;
 						}else{
-							skipCount++;
+							//skipCount++;
 						}
 						break;
 					default:
-						skipCount++
+						break;
+						//skipCount++
 						//trace(file.name+" not a recognised file format"); 
 				}
-				progress.update((skipCount+addedCount)/(dropFiles.length+1));
+				
+				progress.update((dropFilesTotal-dropFiles.length)/(dropFilesTotal+1));
+				
+				dropFiles.pop();
+				if(dropFiles.length==0){
+					stopPopulateTimer();
+					return;
+				}
+				i++;
 			}
 			//trace('onDrop() added '+addedCount+', skipped '+skipCount);
-			progress.visible=false;
-			
-			//we have never played, go at it! so the user doesn't have to double click when dragging files on for the first time
-			if(soundEngine._channel.position==0){
-				soundEngine.playNext();
-			}
-			
-			//user can drop a single mp3 onto CCCATCHER for instant-play
-			if(dropFiles.length==1){
-				soundEngine.forceTrack=file.nativePath;
-				soundEngine.playNext();
-			}			
 		}
+		
 		public function onDragExit(event:NativeDragEvent):void{
 		    //trace("Drag exit event.");
 		}

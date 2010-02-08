@@ -66,6 +66,7 @@ package view{
 				}
 			} else {
 				//we were told to play a specific track by having the public forceTrack set
+				config.currentRandomSong=forceTrack;
 				currentRandomSong=forceTrack;
 				forceTrack='';
 			}
