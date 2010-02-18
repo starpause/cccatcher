@@ -24,10 +24,10 @@ package main {
 	import view.Transport;
 			
 	public class CCCatcher extends WindowedApplication{
-		[Embed(source='./assets/SWFIT_SL.TTF', fontName='_swfit')]
+		[Embed(source='../assets/SWFIT_SL.TTF', fontName='_swfit')]
 		public static var _swfit:Class;
 		
-		[Embed(source='./assets/_uni05_53.ttf', fontName='_uni05')]
+		[Embed(source='../assets/_uni05_53.ttf', fontName='_uni05')]
 		public static var _uni05:Class;
 								
         static private var model:Model = Model.instance;
@@ -151,7 +151,7 @@ package main {
         	if(this.mouseX > 0 && this.mouseY > 0 && this.mouseX < 128 && this.mouseY < 128){
         		//trace('huffa: '+this.mouseX+' '+this.mouseY);
         	}else{
-        	//trace('gone: '+this.mouseX+' '+this.mouseY);
+        		//trace('gone: '+this.mouseX+' '+this.mouseY);
         	}
         }
 
@@ -202,7 +202,9 @@ package main {
         private function erectPlayer():void{
 			var storedRandomSong:String = model.currentRandomSong;
 			//special case: first time app is run there's no song to play =(
-			if(storedRandomSong == ''){return void;}
+			if(storedRandomSong == ''){
+				return;
+			}
 							
 			//if the storedRandomSong is exists, play it
         	if(FileSystem.nativePathExists(storedRandomSong) == true){
@@ -345,12 +347,12 @@ package main {
 					return;
 				}
 				
-				var file:File = dropFiles[0]
+				var file:File = dropFiles[0];
 				
 				switch (file.extension){
 					case "mp3":
 						if(file.name.indexOf('.')==0){/*it's a hidden file with the . at the start*/
-							//skipCount++
+							//skipCount++;
 							break;
 						}
 						if(model.trackAlreadyAdded(file.nativePath)==false){
@@ -362,8 +364,8 @@ package main {
 						}
 						break;
 					default:
+						//skipCount++;
 						break;
-						//skipCount++
 						//trace(file.name+" not a recognised file format"); 
 				}
 				
@@ -409,9 +411,11 @@ package main {
 		
 		private function hitBoxRightDown(event:MouseEvent):void{
 			trace('hitBoxRightDown()');
-			if(mouseLeftDown==true){onPauseSelect()}
-			rightClicks++
-			clickWindow.start()
+			if(mouseLeftDown==true){
+				onPauseSelect();
+			}
+			rightClicks++;
+			clickWindow.start();
 			mouseRightDown=true;
 		}
 		private function hitBoxLeftDown(e:MouseEvent):void{
@@ -423,8 +427,8 @@ package main {
 			waitToDrag.addEventListener(TimerEvent.TIMER, mouseDrag);
 			waitToDrag.start();
 			
-			leftClicks++
-			clickWindow.start()				
+			leftClicks++;
+			clickWindow.start();				
 		}
 		private function hitBoxLeftUp(e:MouseEvent):void{
 			trace('hitBoxLeftUp()');
@@ -446,8 +450,8 @@ package main {
 		}
 		
 		private function hitBoxLeftClick(event:MouseEvent):void{
-			leftClicks++
-			clickWindow.start()
+			leftClicks++;
+			clickWindow.start();
 		}
 		private function clickWindowExpired(event:TimerEvent):void{
 			if(leftClicks==1){
@@ -488,11 +492,11 @@ package main {
         private function onAlphaDivOver(e:MouseEvent):void{
         	TweenLite.killTweensOf(transport);
         	transport.visible=true;
-        	transport.alpha=1
+        	transport.alpha=1;
 
         	TweenLite.killTweensOf(nfoDisplay);
         	nfoDisplay.visible=true;
-        	nfoDisplay.alpha=1
+        	nfoDisplay.alpha=1;
 
         	TweenLite.killTweensOf(timeDisplay);
         	timeDisplay.visible = true;

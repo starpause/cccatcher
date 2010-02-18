@@ -107,7 +107,7 @@ package main{
 		public function addTrack(uri:String):void{
 			//make sure the nativePath isn't already in the list
 			if( trackAlreadyAdded(uri) ){
-				return void;
+				return;
 			}
 			
 			//make the node

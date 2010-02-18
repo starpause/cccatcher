@@ -95,7 +95,7 @@ package view{
 			
 			//special case: first time application is run, lets not freak out
 			if(currentRandomSong == ''){
-				return void;
+				return;
 			}
 			
 			//stop currentRandomSong

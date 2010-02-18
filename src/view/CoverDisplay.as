@@ -17,7 +17,7 @@ package view{
 	 * @author jgray 
 	 */
 	public class CoverDisplay extends Sprite{
-		[Embed(source='./assets/cccatcher.jpg')]
+		[Embed(source='../assets/cccatcher.jpg')]
 		public static var DefaultImage:Class;
 		
 		private var nativePathToParse:String;

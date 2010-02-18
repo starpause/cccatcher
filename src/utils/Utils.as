@@ -1,6 +1,5 @@
 package utils{
 	//duplicateDisplayObject includes:
-	import flash.display.DisplayObject;
 	import flash.geom.Rectangle;
 	import flash.display.*;
 	
@@ -21,7 +20,6 @@ package utils{
 			var seconds:Number = remainder * 60;
 			remainder = seconds - (Math.floor ( seconds ));
 			seconds = Math.floor ( seconds );
-			var hString:String = hours < 10 ? "0" + hours : "" + hours;	
 			var mString:String = minutes < 10 ? "0" + minutes : "" + minutes;
 			var sString:String = seconds < 10 ? "0" + seconds : "" + seconds;
 						
@@ -45,7 +43,7 @@ package utils{
 		 */
 		public static function duplicateDisplayObject(target:DisplayObject, autoAdd:Boolean = false):DisplayObject {
 		    // create duplicate
-		    var targetClass:Class = Object(target).constructor;
+		    var targetClass:Object = Object(target).constructor;
 		    var duplicate:DisplayObject = new targetClass();
 		    
 		    // duplicate properties
