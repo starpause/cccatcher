@@ -9,50 +9,50 @@ package view{
 		static private var glob:Glob = Glob.instance;
 		
 		//these guys are 18x18 ... is 16x16 cooler like favicons?!
-		[Embed(source='./assets/play.png')]
+		[Embed(source='../assets/play.png')]
 		public static var PlayIcon:Class;
 		private var playIcon:Bitmap = new PlayIcon();
-		[Embed(source='./assets/play-over.png')]
+		[Embed(source='../assets/play-over.png')]
 		public static var PlayOver:Class;
 		private var playOver:Bitmap = new PlayOver();
 		private var playButton:Sprite = new Sprite();
 		
-		[Embed(source='./assets/pause.png')]
+		[Embed(source='../assets/pause.png')]
 		public static var PauseIcon:Class;
 		private var pauseIcon:Bitmap = new PauseIcon();
-		[Embed(source='./assets/pause-over.png')]
+		[Embed(source='../assets/pause-over.png')]
 		public static var PauseOver:Class;
 		private var pauseOver:Bitmap = new PauseOver();
 		private var pauseButton:Sprite = new Sprite();
 		
-		[Embed(source='./assets/quit.png')]
+		[Embed(source='../assets/quit.png')]
 		public static var QuitIcon:Class;
 		private var quitIcon:Bitmap = new QuitIcon();
-		[Embed(source='./assets/quit-over.png')]
+		[Embed(source='../assets/quit-over.png')]
 		public static var QuitOver:Class;
 		private var quitOver:Bitmap = new QuitOver();
 		private var quitButton:Sprite = new Sprite();
 		
-		[Embed(source='./assets/trash.png')]
+		[Embed(source='../assets/trash.png')]
 		public static var TrashIcon:Class;
 		private var trashIcon:Bitmap = new TrashIcon();
-		[Embed(source='./assets/trash-over.png')]
+		[Embed(source='../assets/trash-over.png')]
 		public static var TrashOver:Class;
 		private var trashOver:Bitmap = new TrashOver();
 		private var trashButton:Sprite = new Sprite();
 		
-		[Embed(source='./assets/star.png')]
+		[Embed(source='../assets/star.png')]
 		public static var StarIcon:Class;
 		private var starIcon:Bitmap = new StarIcon();
-		[Embed(source='./assets/star-over.png')]
+		[Embed(source='../assets/star-over.png')]
 		public static var StarOver:Class;
 		private var starOver:Bitmap = new StarOver();
 		private var starButton:Sprite = new Sprite();
 
-		[Embed(source='./assets/starFull.png')]
+		[Embed(source='../assets/starFull.png')]
 		public static var StarFullIcon:Class;
 		private var starFullIcon:Bitmap = new StarFullIcon();
-		[Embed(source='./assets/starFull-over.png')]
+		[Embed(source='../assets/starFull-over.png')]
 		public static var StarFullOver:Class;
 		private var starFullOver:Bitmap = new StarFullOver();
 		private var starFullButton:Sprite = new Sprite();
