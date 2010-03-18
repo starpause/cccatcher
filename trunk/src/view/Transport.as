@@ -63,6 +63,7 @@ package view{
 		
 		private function init(e:Event):void{
 			glob.addEventListener(GlobEvent.SET_STAR_FULL, setStar);
+			glob.addEventListener(GlobEvent.TRACK_PLAYING, setPlayPause);
 
 			//pauseButton
 			pauseButton.addChild(pauseIcon);
@@ -210,6 +211,11 @@ package view{
 				starButton.visible=true;
 				starFullButton.visible=false;
 			}
+		}
+		
+		private function setPlayPause(e:GlobEvent):void{
+			playButton.visible=false;
+			pauseButton.visible=true;
 		}
 		
 	}//class
