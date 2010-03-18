@@ -282,11 +282,10 @@ package main {
 			
 			if(dropFiles.length==1){
 				//user can drop a single mp3 onto CCCATCHER for instant-play
-				model.addTrack(dropFiles[0].nativePath);
-				soundEngine.forceTrack=dropFiles[0].nativePath;
+				model.addTrack(File(dropFiles[0]).nativePath);
+				soundEngine.forceTrack=(dropFiles[0] as File).nativePath;
 				soundEngine.playNext();
-				
-			}else{
+			} else{
 				//we have to populate the playlist with all the files that got dropped
 				startPopulateTimer();
 			}
