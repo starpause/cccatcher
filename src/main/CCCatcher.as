@@ -337,10 +337,10 @@ package main {
 				populateInProgress=true;
 			}
 			
-			trace('populateInProgress()');
 			//add the files to our playlist
 			var i:int=0;
 			while(dropFiles.length > 0){
+				
 				//take a break from populating every once in a while so the screen can update
 				if(i >= 10){
 					populateInProgress=false;
@@ -348,7 +348,7 @@ package main {
 				}
 				
 				var file:File = dropFiles[0];
-				
+				//trace('file.nativePath '+file.nativePath);
 				switch (file.extension){
 					case "mp3":
 						if(file.name.indexOf('.')==0){/*it's a hidden file with the . at the start*/
@@ -356,7 +356,7 @@ package main {
 							break;
 						}
 						if(model.trackAlreadyAdded(file.nativePath)==false){
-							//trace('onDrop() add file.nativePath: '+file.nativePath);
+							trace('onDrop() add file.nativePath: '+file.nativePath);
 							model.addTrack(file.nativePath);
 							//addedCount++;
 						}else{
@@ -371,7 +371,7 @@ package main {
 				
 				progress.update((dropFilesTotal-dropFiles.length)/(dropFilesTotal+1));
 				
-				dropFiles.pop();
+				dropFiles.shift();
 				if(dropFiles.length==0){
 					stopPopulateTimer();
 					return;

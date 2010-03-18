@@ -13,7 +13,6 @@ package view{
 		private var shFill:Shape = new Shape();
 		private var spBoard:Sprite = new Sprite();	
 
-//- PUBLIC -//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//-
 		public function Progress(){
 			spBoard.x = circleX;
 			spBoard.y = circleY;
@@ -24,9 +23,8 @@ package view{
 		}
 		
 		public function update(percent:Number):void{
-			trace(percent);
 			var t:Number = 360*(1-percent); //t is in degrees
-			var radianAngle:Number = t*Math.PI/180.0;
+			//var radianAngle:Number = t*Math.PI/180.0;
 			
 			shFill.graphics.clear();
 			shFill.graphics.lineStyle(1,fillColor);
@@ -47,7 +45,6 @@ package view{
 			shFill.graphics.endFill();
 		}
 
-//- PRIVATE -//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//-
 
 
 	}
