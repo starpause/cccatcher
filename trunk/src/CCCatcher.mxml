@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <myNs:CCCatcher xmlns:myNs="main.*" xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" title="CCCatcher" applicationComplete="init();">
 	<mx:Style>
-	    WindowedApplication { 
+	    WindowedApplication {
 	        background-color:"0xFFFFFF";
 	        showFlexChrome:"false";
 	    }

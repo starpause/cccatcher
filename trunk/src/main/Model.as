@@ -13,8 +13,11 @@ package main{
 		public var windowY:int=0; 
 		public var trackList:Array=null;
 		
+		public var currentSongLength:Number = 0;
 		public var currentRandomSong:String = "";
 		public var savedPosition:Number = 0;
+		
+		public const STAGE_WIDTH:int = 128;
 		
 //- SINGLETON ENFORCING --//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//
 		private static const _instance:Model = new Model(SingletonLock); // Storage for the singleton instance.
