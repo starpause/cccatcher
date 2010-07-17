@@ -64,7 +64,11 @@ package view{
 		private function init(e:Event):void{
 			glob.addEventListener(GlobEvent.SET_STAR_FULL, setStar);
 			glob.addEventListener(GlobEvent.TRACK_PLAYING, setPlayPause);
-
+			
+			var starPauseX:Number = 108;
+			var starPauseY:Number = 88;
+			var magicPadding:Number = 18;
+			
 			//pauseButton
 			pauseButton.addChild(pauseIcon);
 			pauseButton.addChild(pauseOver);
@@ -76,8 +80,8 @@ package view{
 			pauseButton.addEventListener(MouseEvent.MOUSE_DOWN, onPauseDown);
 			pauseButton.addEventListener(MouseEvent.MOUSE_OVER, onRollOver);
 			pauseButton.addEventListener(MouseEvent.MOUSE_OUT, onRollOut);
-			pauseButton.y=this.stage.stageHeight-pauseIcon.height-8;
-			pauseButton.x=this.stage.stageWidth-pauseIcon.width-4;
+			pauseButton.y=starPauseY;
+			pauseButton.x=starPauseX;
 			addChild(pauseButton);
 			
 			//playButton
@@ -107,7 +111,7 @@ package view{
 			quitButton.addEventListener(MouseEvent.MOUSE_DOWN, onQuitDown);
 			quitButton.addEventListener(MouseEvent.MOUSE_OVER, onRollOver);
 			quitButton.addEventListener(MouseEvent.MOUSE_OUT, onRollOut);
-			quitButton.y=pauseButton.y;
+			quitButton.y=starPauseY;
 			quitButton.x=4;
 			addChild(quitButton);
 
@@ -122,8 +126,8 @@ package view{
 			trashButton.addEventListener(MouseEvent.MOUSE_DOWN, onTrashDown);
 			trashButton.addEventListener(MouseEvent.MOUSE_OVER, onRollOver);
 			trashButton.addEventListener(MouseEvent.MOUSE_OUT, onRollOut);
-			trashButton.y=quitButton.y-16-8;
-			trashButton.x=quitButton.x;
+			trashButton.y=starPauseY;
+			trashButton.x=quitButton.x + quitButton.width + magicPadding;
 			//trashButton.y=quitButton.y-8;
 			//trashButton.x=12+quitButton.x+quitButton.width;
 			addChild(trashButton);
@@ -139,10 +143,8 @@ package view{
 			starFullButton.addEventListener(MouseEvent.MOUSE_DOWN, onStarFullDown);
 			starFullButton.addEventListener(MouseEvent.MOUSE_OVER, onRollOver);
 			starFullButton.addEventListener(MouseEvent.MOUSE_OUT, onRollOut);
-			starFullButton.y=playButton.y-16-8;
-			starFullButton.x=playButton.x;
-			//starButton.y=quitButton.y-8;
-			//starButton.x=12+quitButton.x+quitButton.width;
+			starFullButton.y=starPauseY;
+			starFullButton.x=playButton.x - starFullButton.width - magicPadding;
 			addChild(starFullButton);
 			
 			//starButton
@@ -156,8 +158,8 @@ package view{
 			starButton.addEventListener(MouseEvent.MOUSE_DOWN, onStarDown);
 			starButton.addEventListener(MouseEvent.MOUSE_OVER, onRollOver);
 			starButton.addEventListener(MouseEvent.MOUSE_OUT, onRollOut);
-			starButton.y=playButton.y-16-8;
-			starButton.x=playButton.x;
+			starButton.y=starFullButton.y;
+			starButton.x=starFullButton.x;
 			//starButton.y=quitButton.y-8;
 			//starButton.x=12+quitButton.x+quitButton.width;
 			addChild(starButton);

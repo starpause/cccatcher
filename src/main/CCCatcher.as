@@ -1,4 +1,7 @@
 package main {
+	import com.greensock.plugins.TweenPlugin;
+	import com.greensock.plugins.AutoAlphaPlugin;
+	
 	//adobe
 	import flash.desktop.*;
 	import flash.display.*;
@@ -7,8 +10,8 @@ package main {
 	import flash.ui.*;
 	import flash.utils.*;
 	
-	import gs.TweenLite;
-	import gs.easing.*;
+	import com.greensock.TweenLite;
+	import com.greensock.easing.*;
 	
 	import mx.core.WindowedApplication;
 	
@@ -22,26 +25,35 @@ package main {
 	import view.SoundEngine;
 	import view.Time;
 	import view.Transport;
-			
+	import view.SoundPlot;
+	
 	public class CCCatcher extends WindowedApplication{
-		[Embed(source='../assets/SWFIT_SL.TTF', fontName='_swfit')]
-		public static var _swfit:Class;
-		
-		[Embed(source='../assets/_uni05_53.ttf', fontName='_uni05')]
-		public static var _uni05:Class;
-								
+		//globals
         static private var model:Model = Model.instance;
 		static private var glob:Glob = Glob.instance;
 		
-		private var cm:ContextMenu = new ContextMenu();
+		//assets
+		[Embed(source='../assets/SWFIT_SL.TTF', fontName='_swfit')]
+		public static var _swfit:Class;
 		
+		[Embed(source='../assets/ProggyTiny.ttf', fontName='_progtiny')]
+		public static var _progtiny:Class;
+		
+		[Embed(source='../assets/_uni05_53.ttf', fontName='_uni05')]
+		public static var _uni05:Class;
+		
+		//view elements
 		private var randomCover:CoverDisplay = new CoverDisplay();			
 		private var soundEngine:SoundEngine = new SoundEngine();
+		private var soundPlot:SoundPlot = new SoundPlot();
 		private var timeDisplay:Time = new Time();
 		private var nfoDisplay:NfoDisplay = new NfoDisplay();
 		private var hitBox:HitBox = new HitBox();
 		private var transport:Transport = new Transport();
 		private var progress:Progress = new Progress();
+		private var alphaDiv:Sprite = new Sprite();
+		private var alphaValue:Number = .8;
+		private var cm:ContextMenu = new ContextMenu();
 		
 		//double click emulation
 		private var leftClicks:int = 0;
@@ -52,9 +64,7 @@ package main {
 		private var mouseLeftDown:Boolean = false;
 		private var mouseRightDown:Boolean = false;
 		
-		private var alphaDiv:Sprite = new Sprite();
-		private var alphaValue:Number = .8;
-		
+		//drop brains
 		private var dropFiles:Array;
 		private var dropFilesTotal:int;
 		private var populateInProgress:Boolean;
@@ -73,6 +83,8 @@ package main {
 			stage.addEventListener(KeyboardEvent.KEY_DOWN,onKeyDown);
 			stage.addEventListener(KeyboardEvent.KEY_UP,onKeyUp);
 			
+			TweenPlugin.activate([AutoAlphaPlugin]);
+			
 			alphaDiv.alpha = alphaValue;
 			alphaDiv.addEventListener(MouseEvent.MOUSE_OVER, onAlphaDivOver);
 			alphaDiv.addEventListener(MouseEvent.MOUSE_MOVE, onAlphaDivOver);
@@ -82,9 +94,7 @@ package main {
 			
 			//controller business
 			glob.addEventListener(GlobEvent.SOUND_LOADED, onSoundLoaded);
-			glob.addEventListener(GlobEvent.UPDATE_TIME, updateTime);
-			//glob.addEventListener(GlobEvent.FILE_DROP, populatePlaylist);
-									
+			
 			//randomCover.alpha = alphaValue;
 			alphaDiv.addChild(randomCover);
 							
@@ -109,19 +119,23 @@ package main {
 			nfoDisplay.visible = false;
 			nfoDisplay.contextMenu = cm;
 			alphaDiv.addChild(nfoDisplay);
-
-
-			timeDisplay.buttonMode=true;
-			timeDisplay.useHandCursor=true;
-			timeDisplay.visible=false;
+			
+			//soundPlot.buttonMode=true;
+			//soundPlot.useHandCursor=true;
+			soundPlot.visible = false;
+			alphaDiv.addChild(soundPlot);
+			
+			//timeDisplay.buttonMode=true;
+			//timeDisplay.useHandCursor=true;
+			//timeDisplay.visible=false;
 			//timeDisplay.useHandCursor = true;//auto display fwd/bak hint text   << >>
 			//timeDisplay.x = int(stage.width/2 - timeDisplay.width/2);
 			//timeDisplay.y = int(stage.height - 15);
-			timeDisplay.addEventListener("LEFT_SINGLE_CLICK", clickTime);
-			timeDisplay.addEventListener("LEFT_SHIFT_CLICK", onPauseSelect);
-			timeDisplay.addEventListener("RIGHT_SHIFT_CLICK", onPauseSelect);
-			timeDisplay.addEventListener("RIGHT_SINGLE_CLICK", rightClickTime);
-			alphaDiv.addChild(timeDisplay);
+			//timeDisplay.addEventListener("LEFT_SINGLE_CLICK", clickTime);
+			//timeDisplay.addEventListener("LEFT_SHIFT_CLICK", onPauseSelect);
+			//timeDisplay.addEventListener("RIGHT_SHIFT_CLICK", onPauseSelect);
+			//timeDisplay.addEventListener("RIGHT_SINGLE_CLICK", rightClickTime);
+			//alphaDiv.addChild(timeDisplay);
 			
 			//play+pause+quit
 			transport.visible=false;
@@ -141,20 +155,16 @@ package main {
 			configureContextMenu();
 			loadWindowPosition();
 			
-			//start timer for update song position
-			var myTimer:Timer = new Timer(50);
-			myTimer.addEventListener('timer', updateTime);
-			myTimer.start();
         }
         
-        private function hoverCheck(e:Event):void{
+        /*private function hoverCheck(e:Event):void{
         	if(this.mouseX > 0 && this.mouseY > 0 && this.mouseX < 128 && this.mouseY < 128){
         		//trace('huffa: '+this.mouseX+' '+this.mouseY);
         	}else{
         		//trace('gone: '+this.mouseX+' '+this.mouseY);
         	}
-        }
-
+        }*/
+		
         private function configureContextMenu():void{            			
 			stage.showDefaultContextMenu = true;
 			cm.hideBuiltInItems();
@@ -448,10 +458,11 @@ package main {
 			soundEngine.rewind();
 		}
 		
-		private function hitBoxLeftClick(event:MouseEvent):void{
+		/*private function hitBoxLeftClick(event:MouseEvent):void{
 			leftClicks++;
 			clickWindow.start();
-		}
+		}*/
+		
 		private function clickWindowExpired(event:TimerEvent):void{
 			if(leftClicks==1){
 				leftSingleClick();
@@ -497,6 +508,10 @@ package main {
         	nfoDisplay.visible=true;
         	nfoDisplay.alpha=1;
 
+        	TweenLite.killTweensOf(soundPlot);
+        	soundPlot.visible = true;
+        	soundPlot.alpha=1;
+
         	TweenLite.killTweensOf(timeDisplay);
         	timeDisplay.visible = true;
         	timeDisplay.alpha=1;
@@ -509,6 +524,7 @@ package main {
         	//tween out
         	TweenLite.to(transport, 2, {autoAlpha:0, ease:Expo.easeOut});
         	TweenLite.to(nfoDisplay, 2, {autoAlpha:0, ease:Expo.easeOut});
+        	TweenLite.to(soundPlot, 2, {autoAlpha:0, ease:Expo.easeOut});
         	TweenLite.to(timeDisplay, 2, {autoAlpha:0, ease:Expo.easeOut});
         	TweenLite.to(alphaDiv, 5, {alpha:alphaValue, ease:Expo.easeOut});
         }
@@ -534,17 +550,11 @@ package main {
 		private function onClearSelect(e:Event=null):void{
 			model.removeAllTracks();
 		}
-		private function onConfigSelect(e:Event=null):void{
+		/*private function onConfigSelect(e:Event=null):void{
 			//todo =(
-		}
+		}*/
 		
 //- SOUND ENGINE HANDLERS -//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//-
-		private function updateTime(e:Event=null):void{
-			var elapsedSeconds:String = Utils.formatTime(soundEngine._channel.position/1000);
-			var totalSeconds:String = Utils.formatTime(soundEngine._songCurrent.length/1000);
-			timeDisplay.display(elapsedSeconds,totalSeconds);
-			//display
-		}
 		private function onSoundLoaded(e:Event):void{
 			nfoDisplay.refreshWith(model.currentRandomSong);
 			randomCover.refreshWith(model.currentRandomSong);	

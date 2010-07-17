@@ -1,4 +1,5 @@
 package view {
+	import flash.utils.Timer;
 	//adobe
 	import flash.events.Event;
 	//import flash.events.EventDispatcher;
@@ -20,7 +21,7 @@ package view {
 		public var _channel : SoundChannel = new SoundChannel();
 		private	var currentRandomSong : String = '';
 		public var forceTrack : String;
-
+		
 		public var songPaused : Boolean = false;
 		public var songPosition : Number = 0;
 
@@ -30,6 +31,21 @@ package view {
 		private var nextStack : Array = new Array;
 		
 		public function SoundEngine() {
+			//start timer for update song position
+			var myTimer:Timer = new Timer(50);
+			myTimer.addEventListener('timer', updateTime);
+			myTimer.start();
+			//listen for global events
+			glob.addEventListener(GlobEvent.WAVE_CLICK, onWaveClick);			
+		}
+
+		private function onWaveClick(event : GlobEvent) : void {
+			songPosition = _songCurrent.length * event.params.positionAsPercent; 
+			_channel.stop();
+			_channel = _songCurrent.play(songPosition);
+			_channel.addEventListener(Event.SOUND_COMPLETE, playNext);
+			songPaused = false;
+			glob.dispatchEvent(new GlobEvent(GlobEvent.UPDATE_TIME,{position:songPosition, length: _songCurrent.length}));
 		}
 
 		public function togglePlay() : void {
@@ -122,7 +138,7 @@ package view {
 			_songCurrent.addEventListener(Event.COMPLETE, onSoundLoaded);
 			_songCurrent.load(req);
 		}
-
+		
 		private function onSoundLoaded(event : Event) : void {
 			_channel.stop();
 			
@@ -134,8 +150,11 @@ package view {
 			_channel = _songCurrent.play(config.savedPosition);				
 			_channel.addEventListener(Event.SOUND_COMPLETE, playNext);
 			songPaused = false;
+			
+			config.currentSongLength = _songCurrent.length;
+			
 			//displatch event 
-			glob.dispatchEvent(new GlobEvent(GlobEvent.SOUND_LOADED));
+			glob.dispatchEvent(new GlobEvent(GlobEvent.SOUND_LOADED,{songCurrent:_songCurrent}));
 		}
 
 		private function onSoundError(event : IOErrorEvent) : void {
@@ -157,7 +176,7 @@ package view {
 			} else {
 				playNext();
 			}
-			glob.dispatchEvent(new GlobEvent(GlobEvent.UPDATE_TIME));
+			glob.dispatchEvent(new GlobEvent(GlobEvent.UPDATE_TIME, {position:songPosition, length: _songCurrent.length}));
 		}
 
 		public function rewind() : void {
@@ -172,7 +191,17 @@ package view {
 				_channel.addEventListener(Event.SOUND_COMPLETE, playNext);
 			}
 			songPaused = false;
-			glob.dispatchEvent(new GlobEvent(GlobEvent.UPDATE_TIME));
+			glob.dispatchEvent(new GlobEvent(GlobEvent.UPDATE_TIME,{position:songPosition, length: _songCurrent.length}));
 		}
+
+		private function updateTime(e:Event=null):void{
+			glob.dispatchEvent(new GlobEvent(GlobEvent.UPDATE_TIME,{position:_channel.position, length: _songCurrent.length}));
+			//var elapsedSeconds:String = Utils.formatTime(soundEngine._channel.position/1000);
+			//var totalSeconds:String = Utils.formatTime(soundEngine._songCurrent.length/1000);
+			//timeDisplay.display(elapsedSeconds,totalSeconds);
+			//display
+		}
+
+
 	}//class
 }//package
