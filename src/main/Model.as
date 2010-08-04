@@ -41,6 +41,7 @@ package main{
 		/**
 		 * Called when on app start. Points the prefsFile File object to the cccatcher-config.xml prefsFile in the AIR application store directory, 
 		 * which is uniquely defined for the application. It then calls the readXML() method, which reads the XML data.
+		 * find out where this directory is on your filesystem at http://help.adobe.com/en_US/AIR/1.5/devappshtml/WS5b3ccc516d4fbf351e63e3d118666ade46-7fe4.html
 		 */
 		private function init():void{
 			prefsFile = File.applicationStorageDirectory;

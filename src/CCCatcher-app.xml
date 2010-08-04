@@ -11,22 +11,21 @@
 			of the AIR runtime required for this application to run.
 			
 	minimumPatchLevel - The minimum patch level of the AIR runtime required to run 
-			the application. Optional.
--->
+			the application. Optional.-->
 
-	<!-- The application identifier string, unique to this application. Required. -->
+	<!-- The application identifier string, unique to this application. Required.-->
 	<id>CCCatcher</id>
 
 	<!-- Used as the filename for the application. Required. -->
 	<filename>CCCatcher</filename>
 
-	<!-- The name that is displayed in the AIR application installer. Optional. -->
+	<!-- The name that is displayed in the AIR application installer. Optional.-->
 	<name>CCCatcher</name>
 
-	<!-- An application version designator (such as "v1", "2.5", or "Alpha 1"). Required. -->
-	<version>release 53</version>
+	<!-- An application version designator (such as "v1", "2.5", or "Alpha 1"). Required.-->
+	<version>release 54</version>
 
-	<!-- Description, displayed in the AIR application installer. Optional. -->
+	<!-- Description, displayed in the AIR application installer. Optional.-->
 	<!-- <description></description> -->
 
 	<!-- Copyright information. Optional -->
@@ -41,19 +40,19 @@
 		<!-- The title of the main window. Optional. -->
 		<!-- <title></title> -->
 
-		<!-- The type of system chrome to use (either "standard" or "none"). Optional. Default standard. -->
+		<!-- The type of system chrome to use (either "standard" or "none"). Optional. Default standard.-->
 		<systemChrome>none</systemChrome>
 
-		<!-- Whether the window is transparent. Only applicable when systemChrome is false. Optional. Default false. -->
+		<!-- Whether the window is transparent. Only applicable when systemChrome is false. Optional. Default false.-->
 		<transparent>true</transparent>
 
-		<!-- Whether the window is initially visible. Optional. Default false. -->
+		<!-- Whether the window is initially visible. Optional. Default false.-->
 		<!-- <visible>false</visible> -->
 
-		<!-- Whether the user can minimize the window. Optional. Default true. -->
+		<!-- Whether the user can minimize the window. Optional. Default true.-->
 		<!-- <minimizable>true</minimizable> -->
 
-		<!-- Whether the user can maximize the window. Optional. Default true. -->
+		<!-- Whether the user can maximize the window. Optional. Default true.-->
 		<!-- <maximizable>false</maximizable> -->
 
 		<!-- Whether the user can resize the window. Optional. Default true. -->
@@ -71,21 +70,21 @@
 		<!-- The window's initial y position. Optional. -->
 		<!-- <y></y> -->
 
-		<!-- The window's minimum size, specified as a width/height pair, such as "400 200". Optional. -->
+		<!-- The window's minimum size, specified as a width/height pair, such as "400 200". Optional.-->
 		<!-- <minSize></minSize> -->
 
-		<!-- The window's initial maximum size, specified as a width/height pair, such as "1600 1200". Optional. -->
+		<!-- The window's initial maximum size, specified as a width/height pair, such as "1600 1200". Optional.-->
 		<!-- <maxSize></maxSize> -->
 	</initialWindow>
 
-	<!-- The subpath of the standard default installation location to use. Optional. -->
+	<!-- The subpath of the standard default installation location to use. Optional.-->
 	<!-- <installFolder></installFolder> -->
 
-	<!-- The subpath of the Windows Start/Programs menu to use. Optional. -->
+	<!-- The subpath of the Windows Start/Programs menu to use. Optional.-->
 	<!-- <programMenuFolder></programMenuFolder> -->
 
 	<!-- The icon the system uses for the application. For at least one resolution,
-		 specify the path to a PNG file included in the AIR package. Optional. -->
+		 specify the path to a PNG file included in the AIR package. Optional.-->
 	<icon> 		
 		<image16x16>assets/cccatcher16.png</image16x16> 
 		<image32x32>assets/cccatcher32.png</image32x32> 
@@ -93,20 +92,20 @@
 		<image128x128>assets/cccatcher128.png</image128x128>
 	</icon> 
 
-	<!-- Whether the application handles the update when a user double-clicks an update version 	of the AIR file (true), or the default AIR application installer handles the update (false). 	Optional. Default false. -->
+	<!-- Whether the application handles the update when a user double-clicks an update version 	of the AIR file (true), or the default AIR application installer handles the update (false). 	Optional. Default false.-->
 	<!-- <customUpdateUI></customUpdateUI> -->
 	
 	<!-- Whether the application can be launched when the user clicks a link in a web browser.
-	Optional. Default false. -->
+	Optional. Default false.-->
 	<allowBrowserInvocation>true</allowBrowserInvocation>
 	
-	<!-- Listing of file types for which the application can register. Optional. -->
+	<!-- Listing of file types for which the application can register. Optional.-->
 	<!-- <fileTypes> -->
 
 		<!-- Defines one file type. Optional. -->
 		<!-- <fileType> -->
 
-			<!-- The name that the system displays for the registered file type. Required. -->
+			<!-- The name that the system displays for the registered file type. Required.-->
 			<!-- <name></name> -->
 
 			<!-- The extension to register. Required. -->
@@ -124,7 +123,7 @@
 				<image32x32></image32x32>
 				<image48x48></image48x48>
 				<image128x128></image128x128>
-			</icon> -->
+			</icon>-->
 			
 		<!-- </fileType> -->
 	<!-- </fileTypes> -->
