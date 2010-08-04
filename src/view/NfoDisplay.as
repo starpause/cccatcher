@@ -37,7 +37,6 @@ package view{
 		
 		public function refreshWith(nativePathToParse:String):void{
 			var trackCopy:String;
-			var folderCopy:String;
 			var chopping:Array;
 			
 			if(nativePathToParse.indexOf('/') != -1){//running on OSX/NIX
@@ -48,12 +47,11 @@ package view{
 				chopping = nativePathToParse.split('\\');
 			}
 			
-			folderCopy = chopping[chopping.length-2]//+' in '+chopping[chopping.length-3];
 			trackCopy = trackCopy.replace('.mp3','');
 			trackCopy = trackCopy.replace('.MP3','');
 			trackCopy = trackCopy.replace('.Mp3','');
 			trackCopy = trackCopy.replace('.mP3','');
-			setCopy(trackCopy+' in '+folderCopy);
+			setCopy(trackCopy);
 		}
 
 	}//class
