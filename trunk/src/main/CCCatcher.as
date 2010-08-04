@@ -1,4 +1,6 @@
 package main {
+	import flash.system.Capabilities;
+
 	import com.greensock.plugins.TweenPlugin;
 	import com.greensock.plugins.AutoAlphaPlugin;
 	
@@ -76,30 +78,82 @@ package main {
 
 //- SETUP -//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//---//-
         public function init():void {
+			TweenPlugin.activate([AutoAlphaPlugin]);
+
+			//controller business
+			glob.addEventListener(GlobEvent.SOUND_LOADED, onSoundLoaded);
+
+        	initStage();
+			
+			initAlphaDiv();
+			
+			alphaDiv.addChild(randomCover);
+			
+			//double click emulation
+			clickWindow.addEventListener(TimerEvent.TIMER, clickWindowExpired);
+			
+			initHitBox();
+			
+			//track name and folder
+			initNfoDisplay();
+			
+			//wave along the bottom
+			soundPlot.visible = false;
+			alphaDiv.addChild(soundPlot);
+
+			//quit, trash, star, pause buttons
+			initTransport();
+			
+			//red progress pie
+			alphaDiv.addChild(progress);
+			
+			initContextMenu();
+			
+			initTrayMenu();
+			
+			initWindowPosition();
+			
+			erectPlayer();
+		}
+
+		private function initTransport() : void {
+			transport.visible=false;
+			transport.addEventListener("PAUSE", onPauseSelect);
+			transport.addEventListener("PLAY", onPauseSelect);
+			transport.addEventListener("QUIT", onQuitSelect);
+			transport.addEventListener("TRASH", onDeleteSelect);
+			transport.addEventListener("STAR_ON", onStarSelect);
+			transport.addEventListener("STAR_OFF", onStarSelect);
+			alphaDiv.addChild(transport);
+		}
+
+		private function initNfoDisplay() : void {
+			//nfo display
+			nfoDisplay.buttonMode = true;
+			nfoDisplay.useHandCursor = true;
+			nfoDisplay.visible = false;
+			nfoDisplay.contextMenu = cm;
+			alphaDiv.addChild(nfoDisplay);
+		}
+
+		private function initAlphaDiv() : void {
+			alphaDiv.alpha = alphaValue;
+			alphaDiv.addEventListener(MouseEvent.MOUSE_OVER, onAlphaDivOver);
+			alphaDiv.addEventListener(MouseEvent.MOUSE_MOVE, onAlphaDivOver);
+			alphaDiv.addEventListener(MouseEvent.MOUSE_OUT, onAlphaDivOut);
+			stage.addChild(alphaDiv);
+		}
+
+		private function initStage() : void {
             stage.nativeWindow.visible = false;
             this.setStyle("backgroundAlpha", .0);
 			this.alwaysInFront = true;
 			stage.nativeWindow.addEventListener(Event.CLOSING, windowClosingHandler); 
 			stage.addEventListener(KeyboardEvent.KEY_DOWN,onKeyDown);
 			stage.addEventListener(KeyboardEvent.KEY_UP,onKeyUp);
-			
-			TweenPlugin.activate([AutoAlphaPlugin]);
-			
-			alphaDiv.alpha = alphaValue;
-			alphaDiv.addEventListener(MouseEvent.MOUSE_OVER, onAlphaDivOver);
-			alphaDiv.addEventListener(MouseEvent.MOUSE_MOVE, onAlphaDivOver);
-			alphaDiv.addEventListener(MouseEvent.MOUSE_OUT, onAlphaDivOut);
+		}
 
-			stage.addChild(alphaDiv);
-			
-			//controller business
-			glob.addEventListener(GlobEvent.SOUND_LOADED, onSoundLoaded);
-			
-			//randomCover.alpha = alphaValue;
-			alphaDiv.addChild(randomCover);
-							
-			//double click emulation
-			clickWindow.addEventListener(TimerEvent.TIMER, clickWindowExpired);
+		private function initHitBox() : void {
 			//attach sh*t to the hitbox
 			hitBox.buttonMode = true;
 			hitBox.addEventListener(NativeDragEvent.NATIVE_DRAG_ENTER,onDragIn);				
@@ -112,52 +166,12 @@ package main {
 			hitBox.addEventListener(MouseEvent.RIGHT_MOUSE_UP, hitBoxRightUp);
 			//hitBox.contextMenu = cm;
 			alphaDiv.addChild(hitBox);
-			
-			//nfo display
-			nfoDisplay.buttonMode = true;
-			nfoDisplay.useHandCursor = true;
-			nfoDisplay.visible = false;
-			nfoDisplay.contextMenu = cm;
-			alphaDiv.addChild(nfoDisplay);
-			
-			//soundPlot.buttonMode=true;
-			//soundPlot.useHandCursor=true;
-			soundPlot.visible = false;
-			alphaDiv.addChild(soundPlot);
-			
-			//timeDisplay.buttonMode=true;
-			//timeDisplay.useHandCursor=true;
-			//timeDisplay.visible=false;
-			//timeDisplay.useHandCursor = true;//auto display fwd/bak hint text   << >>
-			//timeDisplay.x = int(stage.width/2 - timeDisplay.width/2);
-			//timeDisplay.y = int(stage.height - 15);
-			//timeDisplay.addEventListener("LEFT_SINGLE_CLICK", clickTime);
-			//timeDisplay.addEventListener("LEFT_SHIFT_CLICK", onPauseSelect);
-			//timeDisplay.addEventListener("RIGHT_SHIFT_CLICK", onPauseSelect);
-			//timeDisplay.addEventListener("RIGHT_SINGLE_CLICK", rightClickTime);
-			//alphaDiv.addChild(timeDisplay);
-			
-			//play+pause+quit
-			transport.visible=false;
-			transport.addEventListener("PAUSE", onPauseSelect);
-			transport.addEventListener("PLAY", onPauseSelect);
-			transport.addEventListener("QUIT", onQuitSelect);
-			transport.addEventListener("TRASH", onDeleteSelect);
-			transport.addEventListener("STAR_ON", onStarSelect);
-			transport.addEventListener("STAR_OFF", onStarSelect);
-			alphaDiv.addChild(transport);
-			
-			//red progress pie
-			//progress.visible=false;
-			alphaDiv.addChild(progress);
-			
-			//clean dead items out of the TrackList
-			configureContextMenu();
-			loadWindowPosition();
-			
-        }
-        
-        /*private function hoverCheck(e:Event):void{
+		}
+
+		private function initTrayMenu() : void {
+		}
+
+		/*private function hoverCheck(e:Event):void{
         	if(this.mouseX > 0 && this.mouseY > 0 && this.mouseX < 128 && this.mouseY < 128){
         		//trace('huffa: '+this.mouseX+' '+this.mouseY);
         	}else{
@@ -165,7 +179,7 @@ package main {
         	}
         }*/
 		
-        private function configureContextMenu():void{            			
+        private function initContextMenu():void{            			
 			stage.showDefaultContextMenu = true;
 			cm.hideBuiltInItems();
 			
@@ -200,13 +214,21 @@ package main {
 			*/
         }
         
-        private function loadWindowPosition():void{
+        private function initWindowPosition():void{
+      		//x
 			stage.nativeWindow.x = model.windowX;
+			trace('window x: '+stage.nativeWindow.x+" "+Capabilities.screenResolutionX);
+			if(stage.nativeWindow.x >= Capabilities.screenResolutionX){
+				stage.nativeWindow.x = Capabilities.screenResolutionX - Capabilities.screenResolutionX/4;
+			}
+			//y
 			stage.nativeWindow.y = model.windowY;
-			//stage.nativeWindow.width = prefsXML.windowState.@width;
-			//stage.nativeWindow.height = prefsXML.windowState.@height;
+			trace('window y: '+stage.nativeWindow.y+" "+Capabilities.screenResolutionY);
+			if(stage.nativeWindow.y >= Capabilities.screenResolutionY){
+				stage.nativeWindow.y = Capabilities.screenResolutionY - Capabilities.screenResolutionY/4;
+			}
+			//
         	stage.nativeWindow.visible = true;
-        	erectPlayer();
         }
 		
         private function erectPlayer():void{
