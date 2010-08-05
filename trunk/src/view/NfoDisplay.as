@@ -31,12 +31,13 @@ package view{
 		}
 		
 		private function setCopy(newNfo:String='1. drop some mp3 on this window. \n2. double click to shuffle the jams.'):void{
-			_nfoField.text = newNfo;
+			_nfoField.htmlText = newNfo;
 			_nfoBg.height = _nfoField.height-4;
 		}
 		
 		public function refreshWith(nativePathToParse:String):void{
 			var trackCopy:String;
+			var folderCopy:String;
 			var chopping:Array;
 			
 			if(nativePathToParse.indexOf('/') != -1){//running on OSX/NIX
@@ -47,12 +48,14 @@ package view{
 				chopping = nativePathToParse.split('\\');
 			}
 			
+			folderCopy = chopping[chopping.length-2]//+' in '+chopping[chopping.length-3];
 			trackCopy = trackCopy.replace('.mp3','');
 			trackCopy = trackCopy.replace('.MP3','');
 			trackCopy = trackCopy.replace('.Mp3','');
 			trackCopy = trackCopy.replace('.mP3','');
-			setCopy(trackCopy);
+			setCopy(trackCopy+'<font color="#FF0000"> in '+folderCopy+'</font>');
 		}
 
 	}//class
 }//package
+
