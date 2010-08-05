@@ -53,7 +53,7 @@ package view{
 			trackCopy = trackCopy.replace('.MP3','');
 			trackCopy = trackCopy.replace('.Mp3','');
 			trackCopy = trackCopy.replace('.mP3','');
-			setCopy(trackCopy+'<font color="#FF0000"> in '+folderCopy+'</font>');
+			setCopy('<font color="#FF0000">'+trackCopy+'</font> in '+folderCopy);
 		}
 
 	}//class
