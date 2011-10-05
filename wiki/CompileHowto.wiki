@@ -18,4 +18,4 @@ Release:
   * ???
 
 If you don't see any fonts:
-  * open your /flex-sdk-###/frameworks/air-config.xml file and comment out all <fonts><managers> besides flash.fonts.AFEFontManager (it's the only one that works).
+  * open your /flex-sdk-###/frameworks/air-config.xml file ... find flash.fonts.AFEFontManager and comment out all the other font managers (it's the only one that works).
