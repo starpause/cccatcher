@@ -1,0 +1,21 @@
+#For developers
+
+Ingredients:
+  * FDT (4.5 at time of writing)
+  * Flex SDK (flex\_sdk\_4.5.1.21328 at time of writing)
+  * [SVN](http://subversion.tigris.org/) checkout the [Source](http://code.google.com/p/cccatcher/source/checkout)
+
+Preparation:
+  * in FDT -> File -> Import -> type Flex -> Select Fx Project -> Next
+  * Select root directory -> browse -> cccatcher checkout location -> open
+  * Project type: AS3 AIR 4.5
+  * Finish
+
+Debug:
+  * Run -> Run Configurations -> CCCatcher -> Start -> Use Air Descriptor File -> bin/CCCatcherPure-app.xml -> Run
+
+Release:
+  * ???
+
+If you don't see any fonts:
+  * open your /flex-sdk-###/frameworks/air-config.xml file ... find flash.fonts.AFEFontManager and comment out all the other font managers (it's the only one that works).
